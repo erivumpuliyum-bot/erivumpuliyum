@@ -1,4 +1,5 @@
 import { Sparkles } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 import fishCurry from '@/assets/dishes/fish-curry.jpg';
 import keralaMeals from '@/assets/dishes/kerala-meals.jpg';
 import malabarParotta from '@/assets/dishes/malabar-parotta.jpg';
@@ -15,9 +16,53 @@ const bestsellers = [
   { name: 'Beef Fry (Kerala Style)', price: '₹230', image: beefFry },
 ];
 
+// Double the items for seamless infinite scroll
+const duplicatedItems = [...bestsellers, ...bestsellers];
+
 const BestSellers = () => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const scrollContainer = scrollRef.current;
+    if (!scrollContainer) return;
+
+    let animationId: number;
+    let scrollPosition = 0;
+    const scrollSpeed = 1; // pixels per frame
+
+    const animate = () => {
+      scrollPosition += scrollSpeed;
+      
+      // Reset position when we've scrolled through first set of items
+      const halfWidth = scrollContainer.scrollWidth / 2;
+      if (scrollPosition >= halfWidth) {
+        scrollPosition = 0;
+      }
+      
+      scrollContainer.scrollLeft = scrollPosition;
+      animationId = requestAnimationFrame(animate);
+    };
+
+    animationId = requestAnimationFrame(animate);
+
+    // Pause on hover
+    const handleMouseEnter = () => cancelAnimationFrame(animationId);
+    const handleMouseLeave = () => {
+      animationId = requestAnimationFrame(animate);
+    };
+
+    scrollContainer.addEventListener('mouseenter', handleMouseEnter);
+    scrollContainer.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      cancelAnimationFrame(animationId);
+      scrollContainer.removeEventListener('mouseenter', handleMouseEnter);
+      scrollContainer.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, []);
+
   return (
-    <section className="py-16 bg-green-700">
+    <section id="best-sellers" className="py-16 bg-green-700">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="flex items-center justify-center gap-4 mb-12">
@@ -30,9 +75,13 @@ const BestSellers = () => {
           <div className="h-px w-16 bg-orange-300" />
         </div>
 
-        {/* Bestsellers Scroll */}
-        <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide">
-          {bestsellers.map((item, index) => (
+        {/* Infinite Scroll Carousel */}
+        <div 
+          ref={scrollRef}
+          className="flex gap-6 overflow-x-hidden"
+          style={{ scrollBehavior: 'auto' }}
+        >
+          {duplicatedItems.map((item, index) => (
             <div
               key={index}
               className="flex-shrink-0 w-48 md:w-56"
