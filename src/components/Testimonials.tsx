@@ -14,7 +14,7 @@ const testimonials = [
     name: 'Priya Nair',
     location: 'Bellandur, Bangalore',
     rating: 5,
-    text: 'I\'ve tried many Kerala restaurants in Bangalore, but Erivum Puliyum stands out. The beef fry is crispy, spicy, and absolutely divine. The ambience reminds me of home. Highly recommended!',
+    text: 'I\'ve tried many Kerala restaurants in Bangalore, but Erivum Puliyum stands out. The prawn roast is crispy, spicy, and absolutely divine. The ambience reminds me of home. Highly recommended!',
     avatar: 'PN',
   },
   {
@@ -22,7 +22,7 @@ const testimonials = [
     name: 'Rajesh Kumar',
     location: 'HSR Layout, Bangalore',
     rating: 5,
-    text: 'The Malabar parotta with beef curry is to die for! Soft, flaky parottas paired with rich, aromatic curry. Every bite feels like a celebration of Kerala\'s culinary heritage.',
+    text: 'The Malabar parotta with chicken curry is to die for! Soft, flaky parottas paired with rich, aromatic curry. Every bite feels like a celebration of Kerala\'s culinary heritage.',
     avatar: 'RK',
   },
   {
