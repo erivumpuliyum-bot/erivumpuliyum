@@ -5,57 +5,56 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { Eye, EyeOff, Lock, Mail, Key } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import epLogo from '@/assets/ep-logo-full.png';
-
-const ADMIN_SECRET_KEY = 'Rishi@123';
 
 const Auth = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [adminKey, setAdminKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const checkAdminAndRedirect = async (userId: string) => {
+    const { data: roles, error } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .eq('role', 'admin');
+    
+    if (error) {
+      console.error('Error checking role:', error);
+      toast.error('Error checking admin status');
+      return;
+    }
+    
+    if (roles && roles.length > 0) {
+      toast.success('Welcome, Admin!');
+      navigate('/admin');
+    } else {
+      toast.error('Access denied. Admin privileges required.');
+      await supabase.auth.signOut();
+    }
+  };
 
   useEffect(() => {
     // Check if already authenticated
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        // Check if user is admin
-        const { data: roles } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .eq('role', 'admin');
-        
-        if (roles && roles.length > 0) {
-          navigate('/admin');
-        }
+        await checkAdminAndRedirect(session.user.id);
       }
     };
     checkSession();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
-        // Check admin role
-        setTimeout(async () => {
-          const { data: roles } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', session.user.id)
-            .eq('role', 'admin');
-          
-          if (roles && roles.length > 0) {
-            navigate('/admin');
-          } else {
-            toast.error('Access denied. Admin privileges required.');
-            await supabase.auth.signOut();
-          }
-        }, 500);
+        // Use setTimeout to avoid deadlock
+        setTimeout(() => {
+          checkAdminAndRedirect(session.user.id);
+        }, 100);
       }
     });
 
@@ -70,16 +69,10 @@ const Auth = () => {
       return;
     }
 
-    if (isSignUp && adminKey !== ADMIN_SECRET_KEY) {
-      toast.error('Invalid admin secret key');
-      return;
-    }
-
     setIsLoading(true);
 
     try {
       if (isSignUp) {
-        // Sign up with admin key validation
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
@@ -95,20 +88,7 @@ const Auth = () => {
         }
 
         if (signUpData.user) {
-          // Add admin role for the new user
-          const { error: roleError } = await supabase
-            .from('user_roles')
-            .insert({
-              user_id: signUpData.user.id,
-              role: 'admin'
-            });
-
-          if (roleError) {
-            console.error('Role assignment error:', roleError);
-            // Try signing in anyway to check if role was created by trigger
-          }
-
-          toast.success('Admin account created successfully!');
+          toast.success('Account created! Signing you in...');
           
           // Sign in immediately after signup
           const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -117,7 +97,7 @@ const Auth = () => {
           });
 
           if (signInError) {
-            toast.error('Account created. Please sign in.');
+            toast.info('Account created. Please sign in.');
             setIsSignUp(false);
           }
         }
@@ -159,8 +139,13 @@ const Auth = () => {
               Admin Portal
             </h1>
             <p className="text-gray-500 text-sm mt-2">
-              {isSignUp ? 'Create your admin account' : 'Sign in to manage your restaurant'}
+              {isSignUp ? 'Create your account' : 'Sign in to manage your restaurant'}
             </p>
+            {isSignUp && (
+              <p className="text-xs text-green-600 mt-2 bg-green-50 p-2 rounded">
+                Note: The first registered user automatically becomes admin
+              </p>
+            )}
           </div>
 
           {/* Form */}
@@ -205,31 +190,12 @@ const Auth = () => {
               </div>
             </div>
 
-            {isSignUp && (
-              <div className="space-y-2">
-                <Label htmlFor="adminKey" className="text-gray-700">Admin Secret Key</Label>
-                <div className="relative">
-                  <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <Input
-                    id="adminKey"
-                    type="password"
-                    placeholder="Enter admin secret key"
-                    value={adminKey}
-                    onChange={(e) => setAdminKey(e.target.value)}
-                    className="pl-10 border-gray-200 focus:border-green-500 focus:ring-green-500"
-                    required
-                  />
-                </div>
-                <p className="text-xs text-gray-500">Required to create an admin account</p>
-              </div>
-            )}
-
             <Button
               type="submit"
               className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition-all"
               disabled={isLoading}
             >
-              {isLoading ? 'Please wait...' : isSignUp ? 'Create Admin Account' : 'Sign In'}
+              {isLoading ? 'Please wait...' : isSignUp ? 'Create Account' : 'Sign In'}
             </Button>
           </form>
 
@@ -240,10 +206,7 @@ const Auth = () => {
             </span>{' '}
             <button
               type="button"
-              onClick={() => {
-                setIsSignUp(!isSignUp);
-                setAdminKey('');
-              }}
+              onClick={() => setIsSignUp(!isSignUp)}
               className="text-green-600 hover:underline font-medium"
             >
               {isSignUp ? 'Sign In' : 'Sign Up'}
