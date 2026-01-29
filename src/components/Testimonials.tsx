@@ -37,17 +37,15 @@ const testimonials = [
 
 const Testimonials = () => {
   return (
-    <section id="testimonials" className="section-padding bg-background">
-      <div className="container-custom mx-auto">
+    <section id="testimonials" className="py-20 bg-gray-50">
+      <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
-          <p className="text-secondary font-medium text-lg mb-2">Testimonials</p>
-          <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-            What Our <span className="text-primary">Guests</span> Say
+          <h2 className="font-display text-4xl md:text-5xl text-gray-900 mb-4">
+            What Our <span className="text-green-600">Guests</span> Say
           </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Real stories from our beloved customers
-          </p>
+          <p className="text-gray-600 text-lg">Real stories from our beloved customers</p>
+          <div className="w-20 h-1 bg-red-500 mx-auto mt-4" />
         </div>
 
         {/* Testimonials Grid */}
@@ -55,31 +53,31 @@ const Testimonials = () => {
           {testimonials.map((testimonial) => (
             <div
               key={testimonial.id}
-              className="card-kerala p-6 relative"
+              className="bg-white rounded-2xl p-6 shadow-lg relative"
             >
               {/* Quote Icon */}
-              <Quote className="absolute top-4 right-4 w-8 h-8 text-primary/20" />
+              <Quote className="absolute top-4 right-4 w-8 h-8 text-green-100" />
 
               {/* Stars */}
               <div className="flex gap-1 mb-4">
                 {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 text-secondary fill-secondary" />
+                  <Star key={i} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
                 ))}
               </div>
 
               {/* Text */}
-              <p className="text-muted-foreground mb-6 leading-relaxed">
+              <p className="text-gray-600 mb-6 leading-relaxed">
                 "{testimonial.text}"
               </p>
 
               {/* Author */}
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-semibold">
+                <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-white font-semibold">
                   {testimonial.avatar}
                 </div>
                 <div>
-                  <p className="font-semibold text-foreground">{testimonial.name}</p>
-                  <p className="text-sm text-muted-foreground">{testimonial.location}</p>
+                  <p className="font-semibold text-gray-900">{testimonial.name}</p>
+                  <p className="text-sm text-gray-500">{testimonial.location}</p>
                 </div>
               </div>
             </div>

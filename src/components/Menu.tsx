@@ -1,101 +1,104 @@
-import { useState } from 'react';
-import { menuItems, categories, MenuItem } from '@/data/menuData';
-import { Flame } from 'lucide-react';
+import { ArrowRight, Utensils } from 'lucide-react';
+import keralaMeals from '@/assets/dishes/kerala-meals.jpg';
+import chickenRoast from '@/assets/dishes/chicken-roast.jpg';
+import fishCurry from '@/assets/dishes/fish-curry.jpg';
+import malabarParotta from '@/assets/dishes/malabar-parotta.jpg';
 
-const SpiceBadge = ({ level }: { level: MenuItem['spiceLevel'] }) => {
-  const styles = {
-    Mild: 'bg-green-100 text-green-800',
-    Medium: 'bg-yellow-100 text-yellow-800',
-    Spicy: 'bg-red-100 text-red-800',
+const featuredDishes = [
+  {
+    name: 'Kerala Special Meals',
+    description: 'A wholesome traditional meal served with rice, sambar, rasam, avial, thoran,...',
+    image: keralaMeals,
+    tags: ['First-time visitors & lunch lovers'],
+    tagStyle: 'bg-green-100 text-green-700',
+  },
+  {
+    name: 'Kerala Chicken Curry',
+    description: 'Slow-cooked chicken in a coconut-rich gravy with roasted spices and curry...',
+    image: chickenRoast,
+    tags: ['Spicy', 'Aromatic', 'Comforting'],
+    tagStyle: 'bg-orange-400 text-white',
+  },
+  {
+    name: 'Fish Curry (Kudampuli Style)',
+    description: 'A classic Kerala fish curry made with tamarind (kudampuli), coconut oil, and...',
+    image: fishCurry,
+    tags: ['Tangy', 'Bold', 'Traditional'],
+    tagStyle: 'bg-red-500 text-white',
+  },
+  {
+    name: 'Malabar Parotta',
+    description: 'Layered flatbread, soft inside and crispy outside, perfect with curries.',
+    image: malabarParotta,
+    tags: ['Pairs with: Chicken or Beef Fry'],
+    tagStyle: 'bg-gray-100 text-gray-700',
+  },
+];
+
+const Menu = () => {
+  const scrollToSection = (href: string) => {
+    const element = document.querySelector(href);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   return (
-    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${styles[level]}`}>
-      <Flame className="w-3 h-3" />
-      {level}
-    </span>
-  );
-};
-
-const MenuCard = ({ item }: { item: MenuItem }) => (
-  <div className="card-kerala overflow-hidden group hover:shadow-xl transition-all duration-300">
-    <div className="flex flex-col md:flex-row">
-      {/* Image */}
-      <div className="md:w-48 md:h-48 h-48 flex-shrink-0 overflow-hidden">
-        <img
-          src={item.image}
-          alt={item.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-        />
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 p-5">
-        <div className="flex items-start justify-between gap-3 mb-2">
-          <div>
-            <h3 className="font-display text-xl font-semibold text-foreground group-hover:text-primary transition-colors">
-              {item.name}
-            </h3>
-            <p className="text-sm text-secondary font-medium">{item.category}</p>
-          </div>
-          <SpiceBadge level={item.spiceLevel} />
-        </div>
-        <p className="text-muted-foreground text-sm leading-relaxed">
-          {item.description}
-        </p>
-        {item.isBestSeller && (
-          <span className="inline-block mt-3 px-3 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-full">
-            ★ Best Seller
-          </span>
-        )}
-      </div>
-    </div>
-  </div>
-);
-
-const Menu = () => {
-  const [activeCategory, setActiveCategory] = useState('All');
-
-  const filteredItems = activeCategory === 'All'
-    ? menuItems
-    : menuItems.filter(item => item.category === activeCategory);
-
-  return (
-    <section id="menu" className="section-padding bg-muted/30">
-      <div className="container-custom mx-auto">
+    <section id="menu" className="py-20 bg-gray-50">
+      <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
-          <p className="text-secondary font-medium text-lg mb-2">Our Menu</p>
-          <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-            Authentic <span className="text-primary">Kerala</span> Flavours
-          </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Each dish is prepared with love, using traditional recipes and the freshest ingredients.
-          </p>
+          <span className="text-4xl mb-4 block">👨‍🍳</span>
+          <h2 className="font-display text-4xl md:text-5xl text-gray-900 mb-4">From Our Kitchen</h2>
+          <p className="text-gray-600 text-lg">Discover our most beloved dishes, crafted with love and tradition</p>
+          <div className="w-20 h-1 bg-red-500 mx-auto mt-4" />
         </div>
 
-        {/* Category Filter */}
-        <div className="flex flex-wrap justify-center gap-2 mb-10">
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setActiveCategory(category)}
-              className={`px-5 py-2 rounded-full font-medium transition-all duration-300 ${
-                activeCategory === category
-                  ? 'bg-primary text-primary-foreground shadow-lg'
-                  : 'bg-card text-foreground hover:bg-primary/10'
-              }`}
+        {/* Dishes Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+          {featuredDishes.map((dish, index) => (
+            <div
+              key={index}
+              className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
             >
-              {category}
-            </button>
+              <div className="relative">
+                <img
+                  src={dish.image}
+                  alt={dish.name}
+                  className="w-full h-48 object-cover"
+                />
+              </div>
+              <div className="p-5">
+                <h3 className="font-display text-xl text-gray-900 mb-2">{dish.name}</h3>
+                <p className="text-gray-600 text-sm mb-4 line-clamp-2">{dish.description}</p>
+                <div className="flex flex-wrap gap-1 mb-4">
+                  {dish.tags.map((tag, i) => (
+                    <span
+                      key={i}
+                      className={`text-xs px-2 py-1 rounded-full ${dish.tagStyle}`}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                <button className="text-green-600 font-medium text-sm flex items-center gap-1 hover:gap-2 transition-all">
+                  Know More <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
           ))}
         </div>
 
-        {/* Menu Grid */}
-        <div className="grid md:grid-cols-2 gap-6">
-          {filteredItems.map((item) => (
-            <MenuCard key={item.id} item={item} />
-          ))}
+        {/* View Full Menu Button */}
+        <div className="text-center mt-12">
+          <p className="text-gray-600 mb-4">Want to explore more delicious options?</p>
+          <button
+            onClick={() => scrollToSection('#gallery')}
+            className="inline-flex items-center gap-2 px-8 py-4 bg-green-600 text-white rounded-full font-semibold hover:bg-green-700 transition-all shadow-lg"
+          >
+            <Utensils className="w-5 h-5" />
+            View Full Menu
+          </button>
         </div>
       </div>
     </section>

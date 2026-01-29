@@ -5,6 +5,8 @@ import cookingScene from '@/assets/gallery/cooking-scene.jpg';
 import fishCurry from '@/assets/dishes/fish-curry.jpg';
 import beefFry from '@/assets/dishes/beef-fry.jpg';
 import biryani from '@/assets/dishes/biryani.jpg';
+import keralaMeals from '@/assets/dishes/kerala-meals.jpg';
+import chickenRoast from '@/assets/dishes/chicken-roast.jpg';
 import { X } from 'lucide-react';
 
 const galleryImages = [
@@ -14,27 +16,27 @@ const galleryImages = [
   { src: cookingScene, alt: 'Traditional Cooking', category: 'Kitchen' },
   { src: beefFry, alt: 'Kerala Beef Fry', category: 'Food' },
   { src: biryani, alt: 'Malabar Biryani', category: 'Food' },
+  { src: keralaMeals, alt: 'Kerala Special Meals', category: 'Food' },
+  { src: chickenRoast, alt: 'Nadan Chicken Roast', category: 'Food' },
 ];
 
 const Gallery = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   return (
-    <section id="gallery" className="section-padding bg-background">
-      <div className="container-custom mx-auto">
+    <section id="gallery" className="py-20 bg-white">
+      <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
-          <p className="text-secondary font-medium text-lg mb-2">Gallery</p>
-          <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-            A Glimpse of <span className="text-primary">EP Kitchen</span>
+          <h2 className="font-display text-4xl md:text-5xl text-gray-900 mb-4">
+            Our <span className="text-green-600">Gallery</span>
           </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Experience the warmth of our space and the beauty of our food
-          </p>
+          <p className="text-gray-600 text-lg">A glimpse into the flavours and ambience of EP Kitchen</p>
+          <div className="w-20 h-1 bg-red-500 mx-auto mt-4" />
         </div>
 
         {/* Gallery Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
           {galleryImages.map((image, index) => (
             <div
               key={index}
@@ -47,15 +49,15 @@ const Gallery = () => {
                 src={image.src}
                 alt={image.alt}
                 className={`w-full object-cover transition-transform duration-500 group-hover:scale-110 ${
-                  index === 0 ? 'h-64 md:h-full' : 'h-48 md:h-64'
+                  index === 0 ? 'h-64 md:h-full' : 'h-40 md:h-48'
                 }`}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                <span className="inline-block px-3 py-1 bg-primary text-primary-foreground text-sm font-medium rounded-full">
+                <span className="inline-block px-3 py-1 bg-green-600 text-white text-sm font-medium rounded-full">
                   {image.category}
                 </span>
-                <p className="text-primary-foreground font-medium mt-1">{image.alt}</p>
+                <p className="text-white font-medium mt-1">{image.alt}</p>
               </div>
             </div>
           ))}

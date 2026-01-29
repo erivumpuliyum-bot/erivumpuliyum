@@ -1,56 +1,54 @@
-import { menuItems } from '@/data/menuData';
-import { Star } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
+import fishCurry from '@/assets/dishes/fish-curry.jpg';
+import keralaMeals from '@/assets/dishes/kerala-meals.jpg';
+import malabarParotta from '@/assets/dishes/malabar-parotta.jpg';
+import prawnsFry from '@/assets/dishes/prawns-fry.jpg';
+import beefFry from '@/assets/dishes/beef-fry.jpg';
+import chickenRoast from '@/assets/dishes/chicken-roast.jpg';
+
+const bestsellers = [
+  { name: 'Chicken Curry', price: '₹190', image: chickenRoast },
+  { name: 'Fish Curry (Kudampuli Style)', price: '₹220', image: fishCurry },
+  { name: 'Malabar Parotta', price: '₹40', image: malabarParotta },
+  { name: 'Kerala Veg Meals', price: '₹180', image: keralaMeals },
+  { name: 'Prawn Roast', price: '₹260', image: prawnsFry },
+  { name: 'Beef Fry (Kerala Style)', price: '₹230', image: beefFry },
+];
 
 const BestSellers = () => {
-  const bestSellers = menuItems.filter(item => item.isBestSeller);
-
   return (
-    <section className="section-padding bg-primary text-primary-foreground">
-      <div className="container-custom mx-auto">
+    <section className="py-16 bg-green-700">
+      <div className="container mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-foreground/10 rounded-full mb-4">
-            <Star className="w-5 h-5 text-secondary fill-secondary" />
-            <span className="font-medium">Customer Favourites</span>
-          </div>
-          <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-            Our <span className="text-secondary">Best Sellers</span>
+        <div className="flex items-center justify-center gap-4 mb-12">
+          <div className="h-px w-16 bg-orange-300" />
+          <h2 className="flex items-center gap-2 text-orange-200 text-2xl md:text-3xl font-display">
+            <Sparkles className="w-5 h-5" />
+            Our Bestsellers
+            <Sparkles className="w-5 h-5" />
           </h2>
-          <p className="text-primary-foreground/80 text-lg max-w-2xl mx-auto">
-            The dishes that keep our guests coming back for more
-          </p>
+          <div className="h-px w-16 bg-orange-300" />
         </div>
 
-        {/* Best Sellers Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {bestSellers.map((item) => (
+        {/* Bestsellers Scroll */}
+        <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide">
+          {bestsellers.map((item, index) => (
             <div
-              key={item.id}
-              className="group bg-primary-foreground/10 backdrop-blur-sm rounded-xl overflow-hidden hover:bg-primary-foreground/15 transition-all duration-300"
+              key={index}
+              className="flex-shrink-0 w-48 md:w-56"
             >
-              <div className="relative h-48 overflow-hidden">
+              <div className="relative rounded-xl overflow-hidden shadow-xl">
+                {/* Price Badge */}
+                <div className="absolute top-3 left-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold z-10">
+                  {item.price}
+                </div>
                 <img
                   src={item.image}
                   alt={item.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  className="w-full h-40 md:h-48 object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                <div className="absolute bottom-3 left-3 right-3">
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                    item.spiceLevel === 'Mild' ? 'bg-green-500/80 text-white' :
-                    item.spiceLevel === 'Medium' ? 'bg-yellow-500/80 text-white' :
-                    'bg-red-500/80 text-white'
-                  }`}>
-                    {item.spiceLevel}
-                  </span>
-                </div>
               </div>
-              <div className="p-5">
-                <h3 className="font-display text-xl font-semibold mb-2">{item.name}</h3>
-                <p className="text-primary-foreground/70 text-sm line-clamp-2">
-                  {item.description}
-                </p>
-              </div>
+              <p className="text-white text-center mt-3 font-medium">{item.name}</p>
             </div>
           ))}
         </div>
