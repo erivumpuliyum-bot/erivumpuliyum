@@ -5,13 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, Key } from 'lucide-react';
 import epLogo from '@/assets/ep-logo-full.png';
+
+const ADMIN_SECRET_KEY = 'Rishi@123';
 
 const Auth = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [adminKey, setAdminKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -30,9 +33,6 @@ const Auth = () => {
         
         if (roles && roles.length > 0) {
           navigate('/admin');
-        } else {
-          toast.error('Access denied. Admin privileges required.');
-          await supabase.auth.signOut();
         }
       }
     };
@@ -55,7 +55,7 @@ const Auth = () => {
             toast.error('Access denied. Admin privileges required.');
             await supabase.auth.signOut();
           }
-        }, 0);
+        }, 500);
       }
     });
 
@@ -70,28 +70,57 @@ const Auth = () => {
       return;
     }
 
+    if (isSignUp && adminKey !== ADMIN_SECRET_KEY) {
+      toast.error('Invalid admin secret key');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
+        // Sign up with admin key validation
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth`,
-          },
         });
 
-        if (error) {
-          if (error.message.includes('already registered')) {
+        if (signUpError) {
+          if (signUpError.message.includes('already registered')) {
             toast.error('This email is already registered. Please sign in.');
           } else {
-            toast.error(error.message);
+            toast.error(signUpError.message);
           }
           return;
         }
 
-        toast.success('Account created! Please contact an administrator to get admin access.');
+        if (signUpData.user) {
+          // Add admin role for the new user
+          const { error: roleError } = await supabase
+            .from('user_roles')
+            .insert({
+              user_id: signUpData.user.id,
+              role: 'admin'
+            });
+
+          if (roleError) {
+            console.error('Role assignment error:', roleError);
+            // Try signing in anyway to check if role was created by trigger
+          }
+
+          toast.success('Admin account created successfully!');
+          
+          // Sign in immediately after signup
+          const { error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+
+          if (signInError) {
+            toast.error('Account created. Please sign in.');
+            setIsSignUp(false);
+          }
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -108,6 +137,7 @@ const Auth = () => {
         }
       }
     } catch (error: any) {
+      console.error('Auth error:', error);
       toast.error('An unexpected error occurred');
     } finally {
       setIsLoading(false);
@@ -115,9 +145,9 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="card-kerala p-8">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 border border-green-100">
           {/* Logo */}
           <div className="text-center mb-8">
             <img
@@ -125,74 +155,96 @@ const Auth = () => {
               alt="Erivum Puliyum"
               className="h-16 mx-auto mb-4"
             />
-            <h1 className="font-display text-2xl font-bold text-foreground">
+            <h1 className="font-display text-2xl font-bold text-gray-800">
               Admin Portal
             </h1>
-            <p className="text-muted-foreground text-sm mt-2">
-              {isSignUp ? 'Create your account' : 'Sign in to manage your restaurant'}
+            <p className="text-gray-500 text-sm mt-2">
+              {isSignUp ? 'Create your admin account' : 'Sign in to manage your restaurant'}
             </p>
           </div>
 
           {/* Form */}
           <form onSubmit={handleAuth} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-gray-700">Email</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <Input
                   id="email"
                   type="email"
                   placeholder="admin@epkitchen.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 border-gray-200 focus:border-green-500 focus:ring-green-500"
                   required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-gray-700">Password</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-10"
+                  className="pl-10 pr-10 border-gray-200 focus:border-green-500 focus:ring-green-500"
                   required
                   minLength={6}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
+            {isSignUp && (
+              <div className="space-y-2">
+                <Label htmlFor="adminKey" className="text-gray-700">Admin Secret Key</Label>
+                <div className="relative">
+                  <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    id="adminKey"
+                    type="password"
+                    placeholder="Enter admin secret key"
+                    value={adminKey}
+                    onChange={(e) => setAdminKey(e.target.value)}
+                    className="pl-10 border-gray-200 focus:border-green-500 focus:ring-green-500"
+                    required
+                  />
+                </div>
+                <p className="text-xs text-gray-500">Required to create an admin account</p>
+              </div>
+            )}
+
             <Button
               type="submit"
-              className="w-full bg-primary hover:bg-primary/90"
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition-all"
               disabled={isLoading}
             >
-              {isLoading ? 'Please wait...' : isSignUp ? 'Create Account' : 'Sign In'}
+              {isLoading ? 'Please wait...' : isSignUp ? 'Create Admin Account' : 'Sign In'}
             </Button>
           </form>
 
           {/* Toggle */}
           <div className="mt-6 text-center text-sm">
-            <span className="text-muted-foreground">
+            <span className="text-gray-500">
               {isSignUp ? 'Already have an account?' : "Don't have an account?"}
             </span>{' '}
             <button
               type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-primary hover:underline font-medium"
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setAdminKey('');
+              }}
+              className="text-green-600 hover:underline font-medium"
             >
               {isSignUp ? 'Sign In' : 'Sign Up'}
             </button>
@@ -202,7 +254,7 @@ const Auth = () => {
           <div className="mt-6 text-center">
             <a
               href="/"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
             >
               ← Back to Website
             </a>
