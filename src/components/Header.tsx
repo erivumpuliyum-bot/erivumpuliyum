@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Phone, MapPin, Menu, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Phone, MapPin, Menu, X, Settings } from 'lucide-react';
 import epLogo from '@/assets/ep-logo-full.png';
 
 const Header = () => {
@@ -68,6 +69,19 @@ const Header = () => {
 
           {/* Right Side */}
           <div className="flex items-center gap-4">
+            {/* Admin Link */}
+            <Link
+              to="/auth"
+              className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                isScrolled
+                  ? 'text-muted-foreground hover:text-foreground'
+                  : 'text-primary-foreground/70 hover:text-primary-foreground'
+              }`}
+            >
+              <Settings className="w-4 h-4" />
+              Admin
+            </Link>
+
             {/* Locations Badge */}
             <button
               onClick={() => scrollToSection('#locations')}
