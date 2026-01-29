@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, MapPin, Menu, X, Settings } from 'lucide-react';
+import { Phone, Settings } from 'lucide-react';
 import epLogo from '@/assets/ep-logo-full.png';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -20,7 +19,7 @@ const Header = () => {
     { name: 'Menu', href: '#menu' },
     { name: 'Gallery', href: '#gallery' },
     { name: 'Reviews', href: '#testimonials' },
-    { name: 'Contact', href: '#locations' },
+    { name: 'Contact', href: '#contact' },
   ];
 
   const scrollToSection = (href: string) => {
@@ -28,120 +27,62 @@ const Header = () => {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
-    setIsMobileMenuOpen(false);
   };
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? 'bg-background/95 backdrop-blur-md shadow-lg py-2'
-          : 'bg-transparent py-4'
-      }`}
-    >
-      <div className="container-custom mx-auto px-4 md:px-8">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <img
-              src={epLogo}
-              alt="Erivum Puliyum Logo"
-              className="h-12 md:h-14 w-auto object-contain"
-            />
-          </div>
+    <>
+      {/* Main Header */}
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-lg' : 'bg-white'}`}>
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <div className="flex items-center">
+              <img
+                src={epLogo}
+                alt="Erivum Puliyum"
+                className="h-12 md:h-14 w-auto"
+              />
+            </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <button
-                key={link.name}
-                onClick={() => scrollToSection(link.href)}
-                className={`font-medium transition-colors duration-200 ${
-                  isScrolled
-                    ? 'text-foreground hover:text-primary'
-                    : 'text-primary-foreground/90 hover:text-primary-foreground'
-                }`}
-              >
-                {link.name}
-              </button>
-            ))}
-          </nav>
-
-          {/* Right Side */}
-          <div className="flex items-center gap-4">
-            {/* Admin Link */}
-            <Link
-              to="/auth"
-              className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                isScrolled
-                  ? 'text-muted-foreground hover:text-foreground'
-                  : 'text-primary-foreground/70 hover:text-primary-foreground'
-              }`}
-            >
-              <Settings className="w-4 h-4" />
-              Admin
-            </Link>
-
-            {/* Locations Badge */}
-            <button
-              onClick={() => scrollToSection('#locations')}
-              className={`hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                isScrolled
-                  ? 'bg-primary/10 text-primary hover:bg-primary/20'
-                  : 'bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30'
-              }`}
-            >
-              <MapPin className="w-4 h-4" />
-              2 Locations
-            </button>
-
-            {/* Call Button */}
-            <a
-              href="tel:08951755121"
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                isScrolled
-                  ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                  : 'bg-primary-foreground text-primary hover:bg-primary-foreground/90'
-              }`}
-            >
-              <Phone className="w-4 h-4" />
-              <span className="hidden sm:inline">089517 55121</span>
-            </a>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={`lg:hidden p-2 rounded-lg ${
-                isScrolled ? 'text-foreground' : 'text-primary-foreground'
-              }`}
-            >
-              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <nav className="lg:hidden mt-4 pb-4 border-t border-border/20 pt-4">
-            <div className="flex flex-col gap-2">
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center gap-8">
               {navLinks.map((link) => (
                 <button
                   key={link.name}
                   onClick={() => scrollToSection(link.href)}
-                  className={`text-left px-4 py-2 rounded-lg font-medium transition-colors ${
-                    isScrolled
-                      ? 'text-foreground hover:bg-muted'
-                      : 'text-primary-foreground hover:bg-primary-foreground/10'
-                  }`}
+                  className="text-gray-700 hover:text-green-700 font-medium transition-colors"
                 >
                   {link.name}
                 </button>
               ))}
-            </div>
-          </nav>
-        )}
+            </nav>
+
+            {/* Call Button */}
+            <a
+              href="tel:08951755121"
+              className="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-full font-medium hover:bg-green-700 transition-all shadow-lg"
+            >
+              <Phone className="w-4 h-4" />
+              <span className="hidden sm:inline">089517 55121</span>
+            </a>
+          </div>
+        </div>
+      </header>
+
+      {/* Sub Header */}
+      <div className="fixed top-[60px] md:top-[68px] left-0 right-0 z-40 bg-green-700">
+        <div className="container mx-auto px-4 py-2 flex justify-end items-center gap-4">
+          <span className="text-white/80 text-sm hidden sm:inline">Management & Staff:</span>
+          <Link
+            to="/auth"
+            className="flex items-center gap-1.5 text-white text-sm hover:text-white/80 transition-colors"
+          >
+            <Settings className="w-4 h-4" />
+            Admin
+          </Link>
+        </div>
       </div>
-    </header>
+    </>
   );
 };
 
