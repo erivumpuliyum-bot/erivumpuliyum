@@ -13,7 +13,6 @@ const bestsellers = [
   { name: 'Malabar Parotta', price: '₹40', image: malabarParotta },
   { name: 'Kerala Veg Meals', price: '₹180', image: keralaMeals },
   { name: 'Prawn Roast', price: '₹260', image: prawnsFry },
-  { name: 'Beef Fry (Kerala Style)', price: '₹230', image: beefFry },
 ];
 
 // Double the items for seamless infinite scroll
