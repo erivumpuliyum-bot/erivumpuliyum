@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, Flame } from 'lucide-react';
+import { Plus, Pencil, Trash2, Flame, Upload, X } from 'lucide-react';
 
 interface MenuItem {
   id: string;
@@ -30,6 +30,10 @@ const MenuManager = () => {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -70,6 +74,59 @@ const MenuManager = () => {
       is_active: true,
     });
     setEditingItem(null);
+    setImageFile(null);
+    setImagePreview(null);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select an image file');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image must be less than 5MB');
+        return;
+      }
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadImage = async (file: File): Promise<string | null> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+    const filePath = fileName;
+
+    const { error: uploadError } = await supabase.storage
+      .from('menu-images')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      console.error('Upload error:', uploadError);
+      toast.error('Failed to upload image');
+      return null;
+    }
+
+    const { data } = supabase.storage
+      .from('menu-images')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    setFormData({ ...formData, image_url: '' });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleEdit = (item: MenuItem) => {
@@ -83,6 +140,8 @@ const MenuManager = () => {
       is_best_seller: item.is_best_seller || false,
       is_active: item.is_active ?? true,
     });
+    setImagePreview(item.image_url || null);
+    setImageFile(null);
     setIsDialogOpen(true);
   };
 
@@ -94,29 +153,48 @@ const MenuManager = () => {
       return;
     }
 
+    setUploading(true);
+    let imageUrl = formData.image_url;
+
+    // Upload new image if selected
+    if (imageFile) {
+      const uploadedUrl = await uploadImage(imageFile);
+      if (uploadedUrl) {
+        imageUrl = uploadedUrl;
+      } else {
+        setUploading(false);
+        return;
+      }
+    }
+
+    const submitData = { ...formData, image_url: imageUrl || null };
+
     if (editingItem) {
       const { error } = await supabase
         .from('menu_items')
-        .update(formData)
+        .update(submitData)
         .eq('id', editingItem.id);
 
       if (error) {
         toast.error('Failed to update item');
+        setUploading(false);
         return;
       }
       toast.success('Item updated successfully');
     } else {
       const { error } = await supabase
         .from('menu_items')
-        .insert([{ ...formData, display_order: items.length }]);
+        .insert([{ ...submitData, display_order: items.length }]);
 
       if (error) {
         toast.error('Failed to create item');
+        setUploading(false);
         return;
       }
       toast.success('Item created successfully');
     }
 
+    setUploading(false);
     setIsDialogOpen(false);
     resetForm();
     fetchItems();
@@ -209,13 +287,42 @@ const MenuManager = () => {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="image_url">Image URL</Label>
-                <Input
-                  id="image_url"
-                  value={formData.image_url}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  placeholder="https://..."
+                <Label>Image</Label>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileSelect}
+                  accept="image/*"
+                  className="hidden"
                 />
+                {imagePreview ? (
+                  <div className="relative w-full h-32 rounded-lg overflow-hidden border">
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 h-6 w-6"
+                      onClick={removeImage}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full h-32 border-dashed flex flex-col gap-2"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Upload className="h-6 w-6 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Click to upload image</span>
+                  </Button>
+                )}
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -233,8 +340,8 @@ const MenuManager = () => {
                   <Label>Active</Label>
                 </div>
               </div>
-              <Button type="submit" className="w-full bg-primary">
-                {editingItem ? 'Update Item' : 'Add Item'}
+              <Button type="submit" className="w-full bg-primary" disabled={uploading}>
+                {uploading ? 'Uploading...' : editingItem ? 'Update Item' : 'Add Item'}
               </Button>
             </form>
           </DialogContent>
