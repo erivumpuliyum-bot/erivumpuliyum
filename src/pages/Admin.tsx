@@ -5,11 +5,15 @@ import { User } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { LogOut, Menu, Image, MapPin, Home } from 'lucide-react';
+import { LogOut, LayoutDashboard, Utensils, Image, MapPin, Star, Users, Settings, Home } from 'lucide-react';
 import epLogo from '@/assets/ep-logo-full.png';
+import Dashboard from '@/components/admin/Dashboard';
 import MenuManager from '@/components/admin/MenuManager';
 import GalleryManager from '@/components/admin/GalleryManager';
 import LocationManager from '@/components/admin/LocationManager';
+import TestimonialsManager from '@/components/admin/TestimonialsManager';
+import AdminUsersManager from '@/components/admin/AdminUsersManager';
+import SiteSettingsManager from '@/components/admin/SiteSettingsManager';
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -77,6 +81,16 @@ const Admin = () => {
     return null;
   }
 
+  const tabs = [
+    { value: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { value: 'menu', label: 'Menu', icon: Utensils },
+    { value: 'gallery', label: 'Gallery', icon: Image },
+    { value: 'locations', label: 'Locations', icon: MapPin },
+    { value: 'testimonials', label: 'Testimonials', icon: Star },
+    { value: 'admins', label: 'Admins', icon: Users },
+    { value: 'settings', label: 'Settings', icon: Settings },
+  ];
+
   return (
     <div className="min-h-screen bg-muted/30">
       {/* Header */}
@@ -116,21 +130,23 @@ const Admin = () => {
 
       {/* Main Content */}
       <main className="container-custom mx-auto px-4 py-8">
-        <Tabs defaultValue="menu" className="space-y-6">
-          <TabsList className="bg-background border">
-            <TabsTrigger value="menu" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Menu className="w-4 h-4 mr-2" />
-              Menu Items
-            </TabsTrigger>
-            <TabsTrigger value="gallery" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Image className="w-4 h-4 mr-2" />
-              Gallery
-            </TabsTrigger>
-            <TabsTrigger value="locations" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <MapPin className="w-4 h-4 mr-2" />
-              Locations
-            </TabsTrigger>
+        <Tabs defaultValue="dashboard" className="space-y-6">
+          <TabsList className="bg-background border flex-wrap h-auto p-1 gap-1">
+            {tabs.map((tab) => (
+              <TabsTrigger 
+                key={tab.value}
+                value={tab.value} 
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                <tab.icon className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">{tab.label}</span>
+              </TabsTrigger>
+            ))}
           </TabsList>
+
+          <TabsContent value="dashboard">
+            <Dashboard />
+          </TabsContent>
 
           <TabsContent value="menu">
             <MenuManager />
@@ -142,6 +158,18 @@ const Admin = () => {
 
           <TabsContent value="locations">
             <LocationManager />
+          </TabsContent>
+
+          <TabsContent value="testimonials">
+            <TestimonialsManager />
+          </TabsContent>
+
+          <TabsContent value="admins">
+            <AdminUsersManager />
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <SiteSettingsManager />
           </TabsContent>
         </Tabs>
       </main>
