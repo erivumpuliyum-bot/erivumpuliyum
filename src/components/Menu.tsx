@@ -93,11 +93,11 @@ const Menu = () => {
         <div className="text-center mt-12">
           <p className="text-gray-600 mb-4">Want to explore more delicious options?</p>
           <button
-            onClick={() => scrollToSection('#gallery')}
+            onClick={() => scrollToSection('#bestsellers')}
             className="inline-flex items-center gap-2 px-8 py-4 bg-green-600 text-white rounded-full font-semibold hover:bg-green-700 transition-all shadow-lg"
           >
             <Utensils className="w-5 h-5" />
-            View Full Menu
+            View Best Sellers
           </button>
         </div>
       </div>
