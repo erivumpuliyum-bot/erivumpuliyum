@@ -61,7 +61,7 @@ const BestSellers = () => {
   }, []);
 
   return (
-    <section id="best-sellers" className="py-16 bg-green-700">
+    <section id="bestsellers" className="py-16 bg-green-700">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="flex items-center justify-center gap-4 mb-12">
