@@ -92,13 +92,13 @@ const Menu = () => {
         {/* View Full Menu Button */}
         <div className="text-center mt-12">
           <p className="text-gray-600 mb-4">Want to explore more delicious options?</p>
-          <button
-            onClick={() => scrollToSection('#bestsellers')}
+          <a
+            href="/menu"
             className="inline-flex items-center gap-2 px-8 py-4 bg-green-600 text-white rounded-full font-semibold hover:bg-green-700 transition-all shadow-lg"
           >
             <Utensils className="w-5 h-5" />
-            View Best Sellers
-          </button>
+            View Full Menu
+          </a>
         </div>
       </div>
     </section>
