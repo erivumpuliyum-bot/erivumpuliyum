@@ -102,7 +102,7 @@ const Hero = () => {
             SCROLL TO DISCOVER
           </p>
           <button
-            onClick={() => scrollToSection('#best-sellers')}
+            onClick={() => scrollToSection('#about')}
             className="text-white/60 hover:text-white transition-colors animate-bounce"
           >
             <div className="w-7 h-12 border-2 border-white/40 rounded-full flex justify-center pt-2">

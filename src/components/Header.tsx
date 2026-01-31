@@ -1,9 +1,19 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Phone, Settings } from 'lucide-react';
 import epLogo from '@/assets/ep-logo-full.png';
+
+interface NavLink {
+  name: string;
+  href: string;
+  isRoute?: boolean;
+}
+
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -11,7 +21,8 @@ const Header = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-  const navLinks = [{
+
+  const navLinks: NavLink[] = [{
     name: 'About',
     href: '#about'
   }, {
@@ -19,14 +30,16 @@ const Header = () => {
     href: '#menu'
   }, {
     name: 'Gallery',
-    href: '#gallery'
+    href: '/gallery',
+    isRoute: true
   }, {
     name: 'Reviews',
     href: '#testimonials'
   }, {
     name: 'Contact',
-    href: '#contact'
+    href: '#locations'
   }];
+
   const scrollToSection = (href: string) => {
     const element = document.querySelector(href);
     if (element) {
@@ -35,23 +48,43 @@ const Header = () => {
       });
     }
   };
+
+  const handleNavClick = (link: NavLink) => {
+    if (link.isRoute) {
+      navigate(link.href);
+    } else {
+      // If not on homepage, navigate home first then scroll
+      if (location.pathname !== '/') {
+        navigate('/');
+        setTimeout(() => scrollToSection(link.href), 100);
+      } else {
+        scrollToSection(link.href);
+      }
+    }
+  };
+
   return <>
       {/* Main Header - Transparent initially, solid on scroll */}
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'bg-green-700 shadow-lg' : 'bg-gradient-to-b from-green-900/60 via-green-800/30 to-transparent'}`}>
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <div className="flex items-center">
+            <Link to="/" className="flex items-center">
               <img alt="Erivum Puliyum" className="h-12 md:h-14 w-auto brightness-110" src="/lovable-uploads/82340129-92fe-4722-bb78-81fbc5c81b80.jpg" />
-            </div>
+            </Link>
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-8">
-              {navLinks.map(link => <button key={link.name} onClick={() => scrollToSection(link.href)} className={`font-medium transition-colors ${isScrolled ? 'text-white/90 hover:text-white' : 'text-white/90 hover:text-white'}`} style={{
-              fontFamily: "'Poppins', sans-serif"
-            }}>
+              {navLinks.map(link => (
+                <button 
+                  key={link.name} 
+                  onClick={() => handleNavClick(link)} 
+                  className={`font-medium transition-colors ${isScrolled ? 'text-white/90 hover:text-white' : 'text-white/90 hover:text-white'}`} 
+                  style={{ fontFamily: "'Poppins', sans-serif" }}
+                >
                   {link.name}
-                </button>)}
+                </button>
+              ))}
             </nav>
 
             {/* Call Button */}
