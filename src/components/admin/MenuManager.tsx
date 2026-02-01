@@ -6,9 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, Flame, Upload, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, Flame, Upload, X, Leaf } from 'lucide-react';
 
 interface MenuItem {
   id: string;
@@ -18,12 +19,69 @@ interface MenuItem {
   category: string;
   image_url: string | null;
   is_best_seller: boolean | null;
+  is_vegetarian: boolean | null;
   display_order: number | null;
   is_active: boolean | null;
 }
 
-const categories = ['Non-Veg', 'Seafood', 'Rice', 'Breakfast', 'Vegetarian', 'Desserts'];
-const spiceLevels = ['Mild', 'Medium', 'Spicy'];
+const MENU_CATEGORIES = [
+  'Kerala Meals',
+  'Starters',
+  'Main Course – Veg',
+  'Main Course – Non Veg',
+  'Seafood Specials',
+  'Bread & Rice',
+  'Beverages',
+  'Desserts',
+];
+
+const SPICE_LEVELS = ['Mild', 'Medium', 'Spicy'];
+
+// Image compression utility
+const compressImage = (file: File, maxWidth = 1200, quality = 0.8): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let { width, height } = img;
+
+        // Maintain aspect ratio
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Could not get canvas context'));
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              resolve(blob);
+            } else {
+              reject(new Error('Could not compress image'));
+            }
+          },
+          'image/jpeg',
+          quality
+        );
+      };
+      img.onerror = () => reject(new Error('Could not load image'));
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = () => reject(new Error('Could not read file'));
+    reader.readAsDataURL(file);
+  });
+};
 
 const MenuManager = () => {
   const [items, setItems] = useState<MenuItem[]>([]);
@@ -38,9 +96,10 @@ const MenuManager = () => {
     name: '',
     description: '',
     spice_level: 'Medium',
-    category: 'Non-Veg',
+    category: 'Kerala Meals',
     image_url: '',
     is_best_seller: false,
+    is_vegetarian: false,
     is_active: true,
   });
 
@@ -48,6 +107,7 @@ const MenuManager = () => {
     const { data, error } = await supabase
       .from('menu_items')
       .select('*')
+      .order('category')
       .order('display_order', { ascending: true });
 
     if (error) {
@@ -68,9 +128,10 @@ const MenuManager = () => {
       name: '',
       description: '',
       spice_level: 'Medium',
-      category: 'Non-Veg',
+      category: 'Kerala Meals',
       image_url: '',
       is_best_seller: false,
+      is_vegetarian: false,
       is_active: true,
     });
     setEditingItem(null);
@@ -85,10 +146,19 @@ const MenuManager = () => {
         toast.error('Please select an image file');
         return;
       }
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error('Image must be less than 5MB');
+      // Updated: Min 5MB, Max 20MB
+      const minSize = 5 * 1024 * 1024; // 5MB
+      const maxSize = 20 * 1024 * 1024; // 20MB
+
+      if (file.size < minSize) {
+        toast.error('Image must be at least 5MB for high quality');
         return;
       }
+      if (file.size > maxSize) {
+        toast.error('Image must be less than 20MB');
+        return;
+      }
+
       setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -99,25 +169,38 @@ const MenuManager = () => {
   };
 
   const uploadImage = async (file: File): Promise<string | null> => {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-    const filePath = fileName;
+    try {
+      // Compress image before upload
+      toast.info('Compressing image...');
+      const compressedBlob = await compressImage(file);
+      const compressedFile = new File([compressedBlob], file.name, {
+        type: 'image/jpeg',
+      });
 
-    const { error: uploadError } = await supabase.storage
-      .from('menu-images')
-      .upload(filePath, file);
+      const fileExt = 'jpg';
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = fileName;
 
-    if (uploadError) {
-      console.error('Upload error:', uploadError);
-      toast.error('Failed to upload image');
+      const { error: uploadError } = await supabase.storage
+        .from('menu-images')
+        .upload(filePath, compressedFile);
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        toast.error('Failed to upload image');
+        return null;
+      }
+
+      const { data } = supabase.storage
+        .from('menu-images')
+        .getPublicUrl(filePath);
+
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Compression error:', error);
+      toast.error('Failed to process image');
       return null;
     }
-
-    const { data } = supabase.storage
-      .from('menu-images')
-      .getPublicUrl(filePath);
-
-    return data.publicUrl;
   };
 
   const removeImage = () => {
@@ -138,6 +221,7 @@ const MenuManager = () => {
       category: item.category,
       image_url: item.image_url || '',
       is_best_seller: item.is_best_seller || false,
+      is_vegetarian: item.is_vegetarian || false,
       is_active: item.is_active ?? true,
     });
     setImagePreview(item.image_url || null);
@@ -167,7 +251,10 @@ const MenuManager = () => {
       }
     }
 
-    const submitData = { ...formData, image_url: imageUrl || null };
+    const submitData = {
+      ...formData,
+      image_url: imageUrl || null,
+    };
 
     if (editingItem) {
       const { error } = await supabase
@@ -217,9 +304,34 @@ const MenuManager = () => {
     fetchItems();
   };
 
+  const toggleBestSeller = async (item: MenuItem) => {
+    const { error } = await supabase
+      .from('menu_items')
+      .update({ is_best_seller: !item.is_best_seller })
+      .eq('id', item.id);
+
+    if (error) {
+      toast.error('Failed to update best seller status');
+      return;
+    }
+
+    toast.success(
+      item.is_best_seller
+        ? 'Removed from best sellers'
+        : 'Added to best sellers'
+    );
+    fetchItems();
+  };
+
   if (loading) {
     return <div className="text-center py-12">Loading menu items...</div>;
   }
+
+  // Group items by category for display
+  const groupedItems = MENU_CATEGORIES.reduce((acc, category) => {
+    acc[category] = items.filter(item => item.category === category);
+    return acc;
+  }, {} as Record<string, MenuItem[]>);
 
   return (
     <div className="space-y-6">
@@ -235,7 +347,7 @@ const MenuManager = () => {
               Add Item
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingItem ? 'Edit Menu Item' : 'Add Menu Item'}</DialogTitle>
             </DialogHeader>
@@ -266,7 +378,7 @@ const MenuManager = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.map((c) => (
+                      {MENU_CATEGORIES.map((c) => (
                         <SelectItem key={c} value={c}>{c}</SelectItem>
                       ))}
                     </SelectContent>
@@ -279,15 +391,45 @@ const MenuManager = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {spiceLevels.map((s) => (
+                      {SPICE_LEVELS.map((s) => (
                         <SelectItem key={s} value={s}>{s}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
+
+              {/* Veg / Non-Veg Selector */}
               <div className="space-y-2">
-                <Label>Image</Label>
+                <Label>Veg / Non-Veg *</Label>
+                <RadioGroup
+                  value={formData.is_vegetarian ? 'veg' : 'nonveg'}
+                  onValueChange={(v) => setFormData({ ...formData, is_vegetarian: v === 'veg' })}
+                  className="flex gap-4"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="veg" id="veg" />
+                    <Label htmlFor="veg" className="flex items-center gap-1.5 cursor-pointer">
+                      <span className="w-4 h-4 rounded-sm border-2 border-green-600 flex items-center justify-center">
+                        <span className="w-2 h-2 rounded-full bg-green-600" />
+                      </span>
+                      Vegetarian
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="nonveg" id="nonveg" />
+                    <Label htmlFor="nonveg" className="flex items-center gap-1.5 cursor-pointer">
+                      <span className="w-4 h-4 rounded-sm border-2 border-red-600 flex items-center justify-center">
+                        <span className="w-2 h-2 rounded-full bg-red-600" />
+                      </span>
+                      Non-Vegetarian
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Image (5MB - 20MB, will be auto-compressed)</Label>
                 <input
                   type="file"
                   ref={fileInputRef}
@@ -320,7 +462,7 @@ const MenuManager = () => {
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <Upload className="h-6 w-6 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">Click to upload image</span>
+                    <span className="text-sm text-muted-foreground">Click to upload image (5-20MB)</span>
                   </Button>
                 )}
               </div>
@@ -353,52 +495,92 @@ const MenuManager = () => {
           <p className="text-muted-foreground">No menu items yet. Add your first item!</p>
         </div>
       ) : (
-        <div className="grid gap-4">
-          {items.map((item) => (
-            <div
-              key={item.id}
-              className={`card-kerala p-4 flex items-center gap-4 ${!item.is_active ? 'opacity-60' : ''}`}
-            >
-              {item.image_url && (
-                <img
-                  src={item.image_url}
-                  alt={item.name}
-                  className="w-16 h-16 rounded-lg object-cover"
-                />
-              )}
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-foreground">{item.name}</h3>
-                  {item.is_best_seller && (
-                    <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full">
-                      Best Seller
-                    </span>
-                  )}
-                  {!item.is_active && (
-                    <span className="px-2 py-0.5 bg-muted text-muted-foreground text-xs rounded-full">
-                      Inactive
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span>{item.category}</span>
-                  <span>•</span>
-                  <span className="flex items-center gap-1">
-                    <Flame className="w-3 h-3" />
-                    {item.spice_level}
+        <div className="space-y-8">
+          {MENU_CATEGORIES.map(category => {
+            const categoryItems = groupedItems[category];
+            if (categoryItems.length === 0) return null;
+
+            return (
+              <div key={category}>
+                <h3 className="font-display text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+                  <span className="w-6 h-0.5 bg-primary" />
+                  {category}
+                  <span className="text-muted-foreground text-sm font-normal">
+                    ({categoryItems.length})
                   </span>
+                </h3>
+                <div className="grid gap-3">
+                  {categoryItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className={`card-kerala p-4 flex items-center gap-4 ${!item.is_active ? 'opacity-60' : ''}`}
+                    >
+                      {item.image_url && (
+                        <img
+                          src={item.image_url}
+                          alt={item.name}
+                          className="w-16 h-16 rounded-lg object-cover"
+                        />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {/* Veg/Non-veg indicator */}
+                          <span
+                            className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center flex-shrink-0 ${
+                              item.is_vegetarian
+                                ? 'border-green-600'
+                                : 'border-red-600'
+                            }`}
+                          >
+                            <span
+                              className={`w-2 h-2 rounded-full ${
+                                item.is_vegetarian ? 'bg-green-600' : 'bg-red-600'
+                              }`}
+                            />
+                          </span>
+                          <h3 className="font-semibold text-foreground truncate">{item.name}</h3>
+                          {item.is_best_seller && (
+                            <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs rounded-full flex-shrink-0">
+                              ⭐ Best Seller
+                            </span>
+                          )}
+                          {!item.is_active && (
+                            <span className="px-2 py-0.5 bg-muted text-muted-foreground text-xs rounded-full flex-shrink-0">
+                              Inactive
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                          <span className="flex items-center gap-1">
+                            <Flame className="w-3 h-3" />
+                            {item.spice_level}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleBestSeller(item)}
+                          title={item.is_best_seller ? 'Remove from best sellers' : 'Add to best sellers'}
+                        >
+                          <span className={item.is_best_seller ? 'text-orange-500' : 'text-muted-foreground'}>
+                            ⭐
+                          </span>
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}>
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)}>
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}>
-                  <Pencil className="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)}>
-                  <Trash2 className="w-4 h-4 text-destructive" />
-                </Button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

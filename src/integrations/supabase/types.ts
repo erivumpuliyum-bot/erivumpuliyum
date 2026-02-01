@@ -99,6 +99,7 @@ export type Database = {
           image_url: string | null
           is_active: boolean | null
           is_best_seller: boolean | null
+          is_vegetarian: boolean | null
           name: string
           spice_level: string | null
           updated_at: string
@@ -112,6 +113,7 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean | null
           is_best_seller?: boolean | null
+          is_vegetarian?: boolean | null
           name: string
           spice_level?: string | null
           updated_at?: string
@@ -125,6 +127,7 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean | null
           is_best_seller?: boolean | null
+          is_vegetarian?: boolean | null
           name?: string
           spice_level?: string | null
           updated_at?: string

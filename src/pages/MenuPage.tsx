@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Flame, Leaf } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import MenuItemCard from '@/components/menu/MenuItemCard';
+import MenuItemSkeleton from '@/components/menu/MenuItemSkeleton';
 import { supabase } from '@/integrations/supabase/client';
 
 interface MenuItem {
@@ -14,7 +16,19 @@ interface MenuItem {
   spice_level: string | null;
   is_best_seller: boolean | null;
   is_active: boolean | null;
+  is_vegetarian: boolean | null;
 }
+
+const MENU_CATEGORIES = [
+  'Kerala Meals',
+  'Starters',
+  'Main Course – Veg',
+  'Main Course – Non Veg',
+  'Seafood Specials',
+  'Bread & Rice',
+  'Beverages',
+  'Desserts',
+];
 
 const MenuPage = () => {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -26,12 +40,12 @@ const MenuPage = () => {
   }, []);
 
   const fetchMenuItems = async () => {
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('menu_items')
         .select('*')
         .eq('is_active', true)
-        .order('category')
         .order('display_order');
 
       if (error) throw error;
@@ -43,66 +57,72 @@ const MenuPage = () => {
     }
   };
 
-  const categories = ['all', ...Array.from(new Set(menuItems.map(item => item.category)))];
-
-  const filteredItems = activeCategory === 'all' 
-    ? menuItems 
+  // Filter items by active category
+  const filteredItems = activeCategory === 'all'
+    ? menuItems
     : menuItems.filter(item => item.category === activeCategory);
 
-  const groupedItems = filteredItems.reduce((acc, item) => {
-    if (!acc[item.category]) {
-      acc[item.category] = [];
+  // Group items by category for display
+  const groupedItems = MENU_CATEGORIES.reduce((acc, category) => {
+    const categoryItems = filteredItems.filter(item => item.category === category);
+    if (activeCategory === 'all' || activeCategory === category) {
+      acc[category] = categoryItems;
     }
-    acc[item.category].push(item);
     return acc;
   }, {} as Record<string, MenuItem[]>);
 
-  const getSpiceIcon = (level: string | null) => {
-    if (!level) return null;
-    const count = level === 'mild' ? 1 : level === 'medium' ? 2 : 3;
-    return (
-      <div className="flex gap-0.5">
-        {Array.from({ length: count }).map((_, i) => (
-          <Flame key={i} className="w-3 h-3 text-red-500" />
-        ))}
-      </div>
-    );
+  const handleCategoryChange = (category: string) => {
+    setActiveCategory(category);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header />
-      
+
       {/* Hero Banner */}
-      <div className="pt-24 pb-12 bg-green-700">
+      <div className="pt-24 pb-12 bg-primary">
         <div className="container mx-auto px-4">
-          <Link 
-            to="/" 
-            className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-4 transition-colors"
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground mb-4 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Home
           </Link>
-          <h1 className="font-display text-4xl md:text-5xl text-white mb-2">Our Menu</h1>
-          <p className="text-white/80 text-lg">Authentic Kerala cuisine crafted with love</p>
+          <h1 className="font-display text-4xl md:text-5xl text-primary-foreground mb-2">
+            Our Menu
+          </h1>
+          <p className="text-primary-foreground/80 text-lg">
+            Authentic Kerala cuisine crafted with love and tradition
+          </p>
         </div>
       </div>
 
       {/* Category Filter */}
-      <div className="sticky top-[60px] md:top-[68px] bg-white shadow-sm z-30">
+      <div className="sticky top-[60px] md:top-[68px] bg-card shadow-sm z-30 border-b border-border">
         <div className="container mx-auto px-4 py-3">
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            {categories.map(category => (
+            <button
+              onClick={() => handleCategoryChange('all')}
+              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                activeCategory === 'all'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+              }`}
+            >
+              All Items
+            </button>
+            {MENU_CATEGORIES.map(category => (
               <button
                 key={category}
-                onClick={() => setActiveCategory(category)}
+                onClick={() => handleCategoryChange(category)}
                 className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
                   activeCategory === category
-                    ? 'bg-green-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
                 }`}
               >
-                {category === 'all' ? 'All Items' : category}
+                {category}
               </button>
             ))}
           </div>
@@ -110,63 +130,61 @@ const MenuPage = () => {
       </div>
 
       {/* Menu Items */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 md:py-12">
         {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin w-8 h-8 border-4 border-green-600 border-t-transparent rounded-full mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading menu...</p>
+          // Skeleton Loading State
+          <div className="space-y-12">
+            {[1, 2, 3].map((section) => (
+              <div key={section}>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-1 bg-primary rounded" />
+                  <div className="h-8 w-48 bg-muted rounded animate-pulse" />
+                </div>
+                <div className="grid gap-4 md:gap-6">
+                  {[1, 2, 3].map((item) => (
+                    <MenuItemSkeleton key={item} />
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         ) : menuItems.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600">No menu items available yet.</p>
+          <div className="text-center py-16">
+            <span className="text-6xl mb-4 block">🍽️</span>
+            <p className="text-muted-foreground text-lg">
+              No menu items available yet. Check back soon!
+            </p>
           </div>
         ) : (
-          Object.entries(groupedItems).map(([category, items]) => (
-            <div key={category} className="mb-12">
-              <h2 className="font-display text-2xl md:text-3xl text-gray-900 mb-6 flex items-center gap-3">
-                <span className="w-8 h-1 bg-green-600"></span>
-                {category}
-              </h2>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {items.map(item => (
-                  <div 
-                    key={item.id}
-                    className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow"
-                  >
-                    {item.image_url && (
-                      <div className="relative">
-                        <img 
-                          src={item.image_url} 
-                          alt={item.name}
-                          className="w-full h-40 object-cover"
-                        />
-                        {item.is_best_seller && (
-                          <span className="absolute top-2 right-2 bg-orange-500 text-white text-xs px-2 py-1 rounded-full">
-                            Bestseller
-                          </span>
-                        )}
-                      </div>
-                    )}
-                    <div className="p-4">
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <h3 className="font-semibold text-gray-900">{item.name}</h3>
-                        {getSpiceIcon(item.spice_level)}
-                      </div>
-                      {item.description && (
-                        <p className="text-gray-600 text-sm line-clamp-2">{item.description}</p>
-                      )}
-                      {item.spice_level === 'none' && (
-                        <div className="flex items-center gap-1 mt-2 text-green-600 text-xs">
-                          <Leaf className="w-3 h-3" />
-                          <span>Mild</span>
-                        </div>
-                      )}
-                    </div>
+          <div className="space-y-12">
+            {Object.entries(groupedItems).map(([category, items]) => (
+              <div key={category}>
+                <h2 className="font-display text-2xl md:text-3xl text-foreground mb-6 flex items-center gap-3">
+                  <span className="w-8 h-1 bg-primary rounded" />
+                  {category}
+                </h2>
+                {items.length > 0 ? (
+                  <div className="grid gap-4 md:gap-6">
+                    {items.map(item => (
+                      <MenuItemCard
+                        key={item.id}
+                        name={item.name}
+                        description={item.description}
+                        imageUrl={item.image_url}
+                        spiceLevel={item.spice_level}
+                        isVegetarian={item.is_vegetarian ?? false}
+                        isBestSeller={item.is_best_seller ?? false}
+                      />
+                    ))}
                   </div>
-                ))}
+                ) : (
+                  <p className="text-muted-foreground text-sm italic py-4 pl-11">
+                    No items in this category yet
+                  </p>
+                )}
               </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </div>
 
