@@ -27,7 +27,8 @@ const Header = () => {
     href: '#about'
   }, {
     name: 'Menu',
-    href: '#menu'
+    href: '/menu',
+    isRoute: true
   }, {
     name: 'Gallery',
     href: '/gallery',
