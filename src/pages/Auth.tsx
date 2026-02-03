@@ -8,10 +8,13 @@ import { toast } from 'sonner';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import epLogo from '@/assets/ep-logo-full.png';
 
+const SIGNUP_CODE = 'Rishi@123';
+
 const Auth = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [signupCode, setSignupCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -66,6 +69,11 @@ const Auth = () => {
     
     if (!email || !password) {
       toast.error('Please fill in all fields');
+      return;
+    }
+
+    if (isSignUp && signupCode !== SIGNUP_CODE) {
+      toast.error('Invalid signup code');
       return;
     }
 
@@ -189,6 +197,24 @@ const Auth = () => {
                 </button>
               </div>
             </div>
+
+            {isSignUp && (
+              <div className="space-y-2">
+                <Label htmlFor="signupCode" className="text-gray-700">Signup Code</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    id="signupCode"
+                    type="text"
+                    placeholder="Enter signup code"
+                    value={signupCode}
+                    onChange={(e) => setSignupCode(e.target.value)}
+                    className="pl-10 border-gray-200 focus:border-green-500 focus:ring-green-500"
+                    required
+                  />
+                </div>
+              </div>
+            )}
 
             <Button
               type="submit"
