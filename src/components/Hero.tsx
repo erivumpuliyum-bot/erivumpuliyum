@@ -52,22 +52,6 @@ const Hero = () => {
       <div className="relative z-10 h-full flex flex-col items-center justify-center px-4">
         {/* Main Content - Centered */}
         <div className="text-center max-w-4xl mx-auto">
-          {/* Restaurant Name - Kerala-inspired serif font */}
-          <h1 
-            className={`text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-semibold italic tracking-wider mb-6 md:mb-8 transition-all duration-1000 ${
-              isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`}
-            style={{ 
-              fontFamily: "'Cormorant Garamond', 'Playfair Display', serif",
-              color: '#FDF8F3',
-              textShadow: '2px 4px 20px rgba(0,0,0,0.4)',
-              letterSpacing: '0.08em',
-              transitionDelay: '200ms'
-            }}
-          >
-            Erivum Puliyum
-          </h1>
-          
           {/* Tagline - Refined serif */}
           <p 
             className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl italic font-light mb-10 md:mb-14 transition-all duration-1000 ${
@@ -120,9 +104,17 @@ const Hero = () => {
               <MapPin className="w-5 h-5 text-rose-300" />
               <span className="font-medium" style={{ fontFamily: "'Poppins', sans-serif" }}>Marathahalli</span>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-white/15 backdrop-blur-sm rounded-full text-white/90 hover:bg-white/20 transition-colors">
-              <Clock className="w-5 h-5" />
-              <span style={{ fontFamily: "'Poppins', sans-serif" }}>11:30 AM – 11:00 PM</span>
+            <a
+              href="tel:+919008238101"
+              className="group flex items-center gap-2 px-5 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-full font-medium transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+              style={{ fontFamily: "'Poppins', sans-serif" }}
+            >
+              <Phone className="w-4 h-4 transition-transform group-hover:rotate-12" />
+              90082 38101
+            </a>
+            <div className="flex items-center gap-2 text-white/90 hover:text-white transition-colors">
+              <MapPin className="w-5 h-5 text-rose-300" />
+              <span className="font-medium" style={{ fontFamily: "'Poppins', sans-serif" }}>Bellandur</span>
             </div>
             <a
               href="tel:08951755121"
@@ -132,6 +124,10 @@ const Hero = () => {
               <Phone className="w-4 h-4 transition-transform group-hover:rotate-12" />
               089517 55121
             </a>
+            <div className="flex items-center gap-2 px-4 py-2 bg-white/15 backdrop-blur-sm rounded-full text-white/90 hover:bg-white/20 transition-colors">
+              <Clock className="w-5 h-5" />
+              <span style={{ fontFamily: "'Poppins', sans-serif" }}>11:30 AM – 11:00 PM</span>
+            </div>
           </div>
         </div>
 
