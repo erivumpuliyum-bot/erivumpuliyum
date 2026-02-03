@@ -79,44 +79,44 @@ const MenuPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Hero Banner */}
-      <div className="pt-24 pb-12 bg-primary">
+      {/* Hero Banner - Compact on mobile */}
+      <div className="pt-16 sm:pt-20 md:pt-24 pb-6 sm:pb-8 md:pb-12 bg-primary">
         <div className="container mx-auto px-4">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground mb-4 transition-colors"
+            className="inline-flex items-center gap-1.5 sm:gap-2 text-primary-foreground/80 hover:text-primary-foreground mb-2 sm:mb-4 transition-colors text-sm sm:text-base"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             Back to Home
           </Link>
-          <h1 className="font-display text-4xl md:text-5xl text-primary-foreground mb-2">
+          <h1 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-primary-foreground mb-1 sm:mb-2">
             Our Menu
           </h1>
-          <p className="text-primary-foreground/80 text-lg">
-            Authentic Kerala cuisine crafted with love and tradition
+          <p className="text-primary-foreground/80 text-sm sm:text-base md:text-lg">
+            Authentic Kerala cuisine crafted with love
           </p>
         </div>
       </div>
 
-      {/* Category Filter */}
-      <div className="sticky top-[60px] md:top-[68px] bg-card shadow-sm z-30 border-b border-border">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+      {/* Category Filter - Smaller on mobile */}
+      <div className="sticky top-14 sm:top-[60px] md:top-[68px] bg-card shadow-sm z-30 border-b border-border">
+        <div className="container mx-auto px-3 sm:px-4 py-2 sm:py-3">
+          <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1 sm:pb-2 scrollbar-hide -mx-1 px-1">
             <button
               onClick={() => handleCategoryChange('all')}
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
                 activeCategory === 'all'
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-muted text-muted-foreground hover:bg-muted/80'
               }`}
             >
-              All Items
+              All
             </button>
             {MENU_CATEGORIES.map(category => (
               <button
                 key={category}
                 onClick={() => handleCategoryChange(category)}
-                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
                   activeCategory === category
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-muted-foreground hover:bg-muted/80'
@@ -130,17 +130,17 @@ const MenuPage = () => {
       </div>
 
       {/* Menu Items */}
-      <div className="container mx-auto px-4 py-8 md:py-12">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 md:py-12">
         {loading ? (
           // Skeleton Loading State
-          <div className="space-y-12">
+          <div className="space-y-6 sm:space-y-8 md:space-y-12">
             {[1, 2, 3].map((section) => (
               <div key={section}>
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-8 h-1 bg-primary rounded" />
-                  <div className="h-8 w-48 bg-muted rounded animate-pulse" />
+                <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 md:mb-6">
+                  <div className="w-6 sm:w-8 h-1 bg-primary rounded" />
+                  <div className="h-5 sm:h-6 md:h-8 w-32 sm:w-40 md:w-48 bg-muted rounded animate-pulse" />
                 </div>
-                <div className="grid gap-4 md:gap-6">
+                <div className="grid gap-3 sm:gap-4 md:gap-6">
                   {[1, 2, 3].map((item) => (
                     <MenuItemSkeleton key={item} />
                   ))}
@@ -149,22 +149,22 @@ const MenuPage = () => {
             ))}
           </div>
         ) : menuItems.length === 0 ? (
-          <div className="text-center py-16">
-            <span className="text-6xl mb-4 block">🍽️</span>
-            <p className="text-muted-foreground text-lg">
+          <div className="text-center py-12 sm:py-16">
+            <span className="text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4 block">🍽️</span>
+            <p className="text-muted-foreground text-sm sm:text-base md:text-lg">
               No menu items available yet. Check back soon!
             </p>
           </div>
         ) : (
-          <div className="space-y-12">
+          <div className="space-y-6 sm:space-y-8 md:space-y-12">
             {Object.entries(groupedItems).map(([category, items]) => (
               <div key={category}>
-                <h2 className="font-display text-2xl md:text-3xl text-foreground mb-6 flex items-center gap-3">
-                  <span className="w-8 h-1 bg-primary rounded" />
+                <h2 className="font-display text-lg sm:text-xl md:text-2xl lg:text-3xl text-foreground mb-3 sm:mb-4 md:mb-6 flex items-center gap-2 sm:gap-3">
+                  <span className="w-5 sm:w-6 md:w-8 h-1 bg-primary rounded" />
                   {category}
                 </h2>
                 {items.length > 0 ? (
-                  <div className="grid gap-4 md:gap-6">
+                  <div className="grid gap-2.5 sm:gap-3 md:gap-4">
                     {items.map(item => (
                       <MenuItemCard
                         key={item.id}
@@ -178,7 +178,7 @@ const MenuPage = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-muted-foreground text-sm italic py-4 pl-11">
+                  <p className="text-muted-foreground text-xs sm:text-sm italic py-3 sm:py-4 pl-7 sm:pl-9 md:pl-11">
                     No items in this category yet
                   </p>
                 )}

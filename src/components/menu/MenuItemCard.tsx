@@ -23,7 +23,7 @@ const MenuItemCard = ({
     return (
       <div className="flex gap-0.5">
         {Array.from({ length: count }).map((_, i) => (
-          <Flame key={i} className="w-3.5 h-3.5 text-orange-500" />
+          <Flame key={i} className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-orange-500" />
         ))}
       </div>
     );
@@ -31,62 +31,64 @@ const MenuItemCard = ({
 
   return (
     <div className="bg-card rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 border border-border/50">
-      <div className="flex flex-col sm:flex-row">
-        {/* Image Section */}
-        <div className="relative sm:w-40 md:w-48 flex-shrink-0">
+      <div className="flex flex-row">
+        {/* Image Section - Compact on mobile */}
+        <div className="relative w-24 h-24 sm:w-32 sm:h-auto md:w-40 flex-shrink-0">
           {imageUrl ? (
             <img
               src={imageUrl}
               alt={name}
-              className="w-full h-40 sm:h-full object-cover"
+              className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-40 sm:h-full bg-muted flex items-center justify-center">
-              <span className="text-4xl">🍽️</span>
+            <div className="w-full h-full bg-muted flex items-center justify-center">
+              <span className="text-2xl sm:text-3xl">🍽️</span>
             </div>
           )}
           {isBestSeller && (
-            <span className="absolute top-2 left-2 bg-orange-500 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm">
-              ⭐ Bestseller
+            <span className="absolute top-1 left-1 sm:top-2 sm:left-2 bg-orange-500 text-white text-[10px] sm:text-xs font-medium px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full shadow-sm">
+              ⭐ Best
             </span>
           )}
         </div>
 
         {/* Content Section */}
-        <div className="flex-1 p-4 sm:p-5 flex flex-col justify-center">
-          <div className="flex items-start justify-between gap-2 mb-2">
-            <div className="flex items-center gap-2">
+        <div className="flex-1 p-3 sm:p-4 flex flex-col justify-center min-w-0">
+          <div className="flex items-start justify-between gap-1 sm:gap-2 mb-1 sm:mb-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
               {/* Veg/Non-Veg Indicator */}
               <span
-                className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center ${
+                className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-sm border-2 flex items-center justify-center flex-shrink-0 ${
                   isVegetarian
                     ? 'border-green-600'
                     : 'border-red-600'
                 }`}
               >
                 <span
-                  className={`w-2 h-2 rounded-full ${
+                  className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
                     isVegetarian ? 'bg-green-600' : 'bg-red-600'
                   }`}
                 />
               </span>
-              <h3 className="font-display text-lg md:text-xl text-foreground font-semibold">
+              <h3 className="font-display text-sm sm:text-base md:text-lg text-foreground font-semibold truncate">
                 {name}
               </h3>
             </div>
-            {getSpiceIcons(spiceLevel)}
+            <div className="flex-shrink-0">
+              {getSpiceIcons(spiceLevel)}
+            </div>
           </div>
 
           {description && (
-            <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
+            <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed line-clamp-2">
               {description}
             </p>
           )}
 
-          {/* Vegetarian badge for veg items */}
+          {/* Vegetarian badge for veg items - hidden on very small screens */}
           {isVegetarian && (
-            <div className="flex items-center gap-1 mt-3 text-green-600 text-xs font-medium">
-              <Leaf className="w-3.5 h-3.5" />
+            <div className="hidden sm:flex items-center gap-1 mt-2 text-green-600 text-xs font-medium">
+              <Leaf className="w-3 h-3" />
               <span>Pure Vegetarian</span>
             </div>
           )}
