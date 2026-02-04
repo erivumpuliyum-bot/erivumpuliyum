@@ -9,7 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, Flame, Upload, X, Leaf } from 'lucide-react';
+import { Plus, Pencil, Trash2, Flame, Upload, X, Leaf, Search } from 'lucide-react';
 
 interface MenuItem {
   id: string;
@@ -91,6 +91,7 @@ const MenuManager = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -327,20 +328,35 @@ const MenuManager = () => {
     return <div className="text-center py-12">Loading menu items...</div>;
   }
 
+  // Filter items by search query
+  const filteredItems = items.filter(item =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   // Group items by category for display
   const groupedItems = MENU_CATEGORIES.reduce((acc, category) => {
-    acc[category] = items.filter(item => item.category === category);
+    acc[category] = filteredItems.filter(item => item.category === category);
     return acc;
   }, {} as Record<string, MenuItem[]>);
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="font-display text-2xl font-bold text-foreground">Menu Items</h2>
           <p className="text-muted-foreground">Manage your restaurant's menu</p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetForm(); }}>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search items..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 w-full sm:w-64"
+            />
+          </div>
+          <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
             <Button className="bg-primary">
               <Plus className="w-4 h-4 mr-2" />
@@ -488,6 +504,7 @@ const MenuManager = () => {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {items.length === 0 ? (
