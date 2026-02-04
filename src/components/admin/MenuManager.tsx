@@ -146,12 +146,12 @@ const MenuManager = () => {
         toast.error('Please select an image file');
         return;
       }
-      // Updated: Min 5MB, Max 20MB
-      const minSize = 5 * 1024 * 1024; // 5MB
+      // Updated: Min 0.1MB, Max 20MB
+      const minSize = 0.1 * 1024 * 1024; // 0.1MB (100KB)
       const maxSize = 20 * 1024 * 1024; // 20MB
 
       if (file.size < minSize) {
-        toast.error('Image must be at least 5MB for high quality');
+        toast.error('Image must be at least 100KB');
         return;
       }
       if (file.size > maxSize) {
@@ -429,7 +429,7 @@ const MenuManager = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Image (5MB - 20MB, will be auto-compressed)</Label>
+                <Label>Image (100KB - 20MB, will be auto-compressed)</Label>
                 <input
                   type="file"
                   ref={fileInputRef}
@@ -462,7 +462,7 @@ const MenuManager = () => {
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <Upload className="h-6 w-6 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">Click to upload image (5-20MB)</span>
+                    <span className="text-sm text-muted-foreground">Click to upload image (100KB - 20MB)</span>
                   </Button>
                 )}
               </div>
