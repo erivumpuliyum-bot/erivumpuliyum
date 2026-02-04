@@ -90,9 +90,9 @@ const GalleryManager = () => {
       return;
     }
 
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error('Image size must be less than 10MB');
+    // Validate file size (max 25MB)
+    if (file.size > 25 * 1024 * 1024) {
+      toast.error('Image size must be less than 25MB');
       return;
     }
 
@@ -244,7 +244,7 @@ const GalleryManager = () => {
                     <div className="flex flex-col items-center gap-2">
                       <Upload className="w-8 h-8 text-muted-foreground" />
                       <span className="text-sm text-muted-foreground">Click to upload image</span>
-                      <span className="text-xs text-muted-foreground">Max 10MB</span>
+                      <span className="text-xs text-muted-foreground">Max 25MB</span>
                     </div>
                   )}
                 </div>
