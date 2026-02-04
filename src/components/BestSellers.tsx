@@ -1,48 +1,72 @@
 import { Sparkles } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import fishCurry from '@/assets/dishes/fish-curry.jpg';
-import keralaMeals from '@/assets/dishes/kerala-meals.jpg';
-import malabarParotta from '@/assets/dishes/malabar-parotta.jpg';
-import prawnsFry from '@/assets/dishes/prawns-fry.jpg';
-import chickenRoast from '@/assets/dishes/chicken-roast.jpg';
+import { supabase } from '@/integrations/supabase/client';
 import { AnimatedSection } from '@/components/ui/animated-section';
 import { BestSellerSkeleton } from '@/components/ui/skeleton-shimmer';
 
-const bestsellers = [
-  { name: 'Chicken Curry', price: '₹190', image: chickenRoast },
-  { name: 'Fish Curry (Kudampuli Style)', price: '₹220', image: fishCurry },
-  { name: 'Malabar Parotta', price: '₹40', image: malabarParotta },
-  { name: 'Kerala Veg Meals', price: '₹180', image: keralaMeals },
-  { name: 'Prawn Roast', price: '₹260', image: prawnsFry },
-];
-
-// Double the items for seamless infinite scroll
-const duplicatedItems = [...bestsellers, ...bestsellers];
+interface GalleryImage {
+  id: string;
+  title: string;
+  image_url: string;
+  category: string | null;
+}
 
 const BestSellers = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [imagesLoaded, setImagesLoaded] = useState(false);
-  const [loadedCount, setLoadedCount] = useState(0);
+  const [galleryItems, setGalleryItems] = useState<GalleryImage[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch food photos from gallery
+  useEffect(() => {
+    const fetchGalleryImages = async () => {
+      const { data, error } = await supabase
+        .from('gallery_images')
+        .select('id, title, image_url, category')
+        .eq('category', 'Food')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching gallery images:', error);
+        setLoading(false);
+        return;
+      }
+
+      setGalleryItems(data || []);
+      setLoading(false);
+    };
+
+    fetchGalleryImages();
+  }, []);
 
   // Preload images
   useEffect(() => {
+    if (galleryItems.length === 0) return;
+
     let loaded = 0;
-    bestsellers.forEach((item) => {
+    galleryItems.forEach((item) => {
       const img = new Image();
-      img.src = item.image;
+      img.src = item.image_url;
       img.onload = () => {
         loaded++;
-        setLoadedCount(loaded);
-        if (loaded === bestsellers.length) {
+        if (loaded === galleryItems.length) {
+          setImagesLoaded(true);
+        }
+      };
+      img.onerror = () => {
+        loaded++;
+        if (loaded === galleryItems.length) {
           setImagesLoaded(true);
         }
       };
     });
-  }, []);
+  }, [galleryItems]);
 
+  // Infinite scroll animation
   useEffect(() => {
     const scrollContainer = scrollRef.current;
-    if (!scrollContainer || !imagesLoaded) return;
+    if (!scrollContainer || !imagesLoaded || galleryItems.length === 0) return;
 
     let animationId: number;
     let scrollPosition = 0;
@@ -75,7 +99,15 @@ const BestSellers = () => {
       scrollContainer.removeEventListener('mouseenter', handleMouseEnter);
       scrollContainer.removeEventListener('mouseleave', handleMouseLeave);
     };
-  }, [imagesLoaded]);
+  }, [imagesLoaded, galleryItems.length]);
+
+  // Double the items for seamless infinite scroll
+  const duplicatedItems = [...galleryItems, ...galleryItems];
+
+  // Don't render if no gallery items
+  if (!loading && galleryItems.length === 0) {
+    return null;
+  }
 
   return (
     <section id="bestsellers" className="py-16 bg-green-700 overflow-hidden">
@@ -94,7 +126,7 @@ const BestSellers = () => {
         </AnimatedSection>
 
         {/* Loading Skeleton */}
-        {!imagesLoaded && (
+        {(loading || !imagesLoaded) && (
           <div className="flex gap-6 overflow-hidden">
             {Array.from({ length: 5 }).map((_, i) => (
               <BestSellerSkeleton key={i} className="opacity-50" />
@@ -105,23 +137,19 @@ const BestSellers = () => {
         {/* Infinite Scroll Carousel */}
         <div 
           ref={scrollRef}
-          className={`flex gap-6 overflow-x-hidden transition-opacity duration-500 ${imagesLoaded ? 'opacity-100' : 'opacity-0 h-0'}`}
+          className={`flex gap-6 overflow-x-hidden transition-opacity duration-500 ${imagesLoaded && !loading ? 'opacity-100' : 'opacity-0 h-0'}`}
           style={{ scrollBehavior: 'auto' }}
         >
           {duplicatedItems.map((item, index) => (
             <div
-              key={index}
+              key={`${item.id}-${index}`}
               className="flex-shrink-0 w-48 md:w-56 group cursor-pointer"
             >
               <div className="relative rounded-xl overflow-hidden shadow-xl transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-2">
-                {/* Price Badge */}
-                <div className="absolute top-3 left-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold z-10 transition-transform group-hover:scale-110">
-                  {item.price}
-                </div>
                 <div className="overflow-hidden">
                   <img
-                    src={item.image}
-                    alt={item.name}
+                    src={item.image_url}
+                    alt={item.title}
                     className="w-full h-40 md:h-48 object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 </div>
@@ -129,7 +157,7 @@ const BestSellers = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>
               <p className="text-white text-center mt-3 font-medium transition-transform duration-300 group-hover:-translate-y-1">
-                {item.name}
+                {item.title}
               </p>
             </div>
           ))}
