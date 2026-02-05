@@ -326,3 +326,22 @@
   .stagger-4 { animation-delay: 0.4s; }
   .stagger-5 { animation-delay: 0.5s; }
 }
+
+/* Infinite scroll animation for carousel */
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll linear infinite;
+}
+
+.animate-scroll:hover,
+.hover\:pause-animation:hover {
+  animation-play-state: paused;
+}

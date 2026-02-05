@@ -78,6 +78,7 @@ const Gallery = () => {
                 <img
                   src={image.image_url}
                   alt={image.title}
+                  loading="lazy"
                   className={`w-full object-cover transition-transform duration-500 group-hover:scale-110 ${
                     index === 0 ? 'h-64 md:h-full' : 'h-40 md:h-48'
                   }`}

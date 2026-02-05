@@ -1,5 +1,5 @@
 import { Sparkles } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AnimatedSection } from '@/components/ui/animated-section';
 import { BestSellerSkeleton } from '@/components/ui/skeleton-shimmer';
@@ -12,8 +12,6 @@ interface GalleryImage {
 }
 
 const BestSellers = () => {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [imagesLoaded, setImagesLoaded] = useState(false);
   const [galleryItems, setGalleryItems] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,67 +38,6 @@ const BestSellers = () => {
     fetchGalleryImages();
   }, []);
 
-  // Preload images
-  useEffect(() => {
-    if (galleryItems.length === 0) return;
-
-    let loaded = 0;
-    galleryItems.forEach((item) => {
-      const img = new Image();
-      img.src = item.image_url;
-      img.onload = () => {
-        loaded++;
-        if (loaded === galleryItems.length) {
-          setImagesLoaded(true);
-        }
-      };
-      img.onerror = () => {
-        loaded++;
-        if (loaded === galleryItems.length) {
-          setImagesLoaded(true);
-        }
-      };
-    });
-  }, [galleryItems]);
-
-  // Infinite scroll animation
-  useEffect(() => {
-    const scrollContainer = scrollRef.current;
-    if (!scrollContainer || !imagesLoaded || galleryItems.length === 0) return;
-
-    let animationId: number;
-    let scrollPosition = 0;
-    const scrollSpeed = 1;
-
-    const animate = () => {
-      scrollPosition += scrollSpeed;
-      
-      const halfWidth = scrollContainer.scrollWidth / 2;
-      if (scrollPosition >= halfWidth) {
-        scrollPosition = 0;
-      }
-      
-      scrollContainer.scrollLeft = scrollPosition;
-      animationId = requestAnimationFrame(animate);
-    };
-
-    animationId = requestAnimationFrame(animate);
-
-    const handleMouseEnter = () => cancelAnimationFrame(animationId);
-    const handleMouseLeave = () => {
-      animationId = requestAnimationFrame(animate);
-    };
-
-    scrollContainer.addEventListener('mouseenter', handleMouseEnter);
-    scrollContainer.addEventListener('mouseleave', handleMouseLeave);
-
-    return () => {
-      cancelAnimationFrame(animationId);
-      scrollContainer.removeEventListener('mouseenter', handleMouseEnter);
-      scrollContainer.removeEventListener('mouseleave', handleMouseLeave);
-    };
-  }, [imagesLoaded, galleryItems.length]);
-
   // Double the items for seamless infinite scroll
   const duplicatedItems = [...galleryItems, ...galleryItems];
 
@@ -126,7 +63,7 @@ const BestSellers = () => {
         </AnimatedSection>
 
         {/* Loading Skeleton */}
-        {(loading || !imagesLoaded) && (
+        {loading && (
           <div className="flex gap-6 overflow-hidden">
             {Array.from({ length: 5 }).map((_, i) => (
               <BestSellerSkeleton key={i} className="opacity-50" />
@@ -135,33 +72,40 @@ const BestSellers = () => {
         )}
 
         {/* Infinite Scroll Carousel */}
-        <div 
-          ref={scrollRef}
-          className={`flex gap-6 overflow-x-hidden transition-opacity duration-500 ${imagesLoaded && !loading ? 'opacity-100' : 'opacity-0 h-0'}`}
-          style={{ scrollBehavior: 'auto' }}
-        >
-          {duplicatedItems.map((item, index) => (
-            <div
-              key={`${item.id}-${index}`}
-              className="flex-shrink-0 w-48 md:w-56 group cursor-pointer"
+        {!loading && galleryItems.length > 0 && (
+          <div className="overflow-hidden">
+            <div 
+              className="flex gap-6 animate-scroll hover:pause-animation"
+              style={{ 
+                width: 'max-content',
+                animationDuration: `${duplicatedItems.length * 3}s`
+              }}
             >
-              <div className="relative rounded-xl overflow-hidden shadow-xl transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-2">
-                <div className="overflow-hidden">
-                  <img
-                    src={item.image_url}
-                    alt={item.title}
-                    className="w-full h-40 md:h-48 object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
+              {duplicatedItems.map((item, index) => (
+                <div
+                  key={`${item.id}-${index}`}
+                  className="flex-shrink-0 w-48 md:w-56 group cursor-pointer"
+                >
+                  <div className="relative rounded-xl overflow-hidden shadow-xl transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-2">
+                    <div className="overflow-hidden">
+                      <img
+                        src={item.image_url}
+                        alt={item.title}
+                        loading="lazy"
+                        className="w-full h-40 md:h-48 object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    </div>
+                    {/* Overlay on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                  <p className="text-white text-center mt-3 font-medium transition-transform duration-300 group-hover:-translate-y-1">
+                    {item.title}
+                  </p>
                 </div>
-                {/* Overlay on hover */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </div>
-              <p className="text-white text-center mt-3 font-medium transition-transform duration-300 group-hover:-translate-y-1">
-                {item.title}
-              </p>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        )}
       </div>
     </section>
   );
