@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import spicesImage from '@/assets/spices-image.jpg';
-import chefCooking from '@/assets/chef-cooking.jpg';
+import sadyaFeast from '@/assets/gallery/sadya-feast.jpg';
 import { AnimatedSection } from '@/components/ui/animated-section';
 import { SkeletonShimmer } from '@/components/ui/skeleton-shimmer';
 
 const About = () => {
-  const [imagesLoaded, setImagesLoaded] = useState({ spices: false, chef: false });
+  const [imagesLoaded, setImagesLoaded] = useState({ spices: false, feast: false });
 
   useEffect(() => {
     // Preload images
@@ -13,9 +13,9 @@ const About = () => {
     spicesImg.src = spicesImage;
     spicesImg.onload = () => setImagesLoaded(prev => ({ ...prev, spices: true }));
 
-    const chefImg = new Image();
-    chefImg.src = chefCooking;
-    chefImg.onload = () => setImagesLoaded(prev => ({ ...prev, chef: true }));
+    const feastImg = new Image();
+    feastImg.src = sadyaFeast;
+    feastImg.onload = () => setImagesLoaded(prev => ({ ...prev, feast: true }));
   }, []);
 
   return (
@@ -68,14 +68,14 @@ const About = () => {
                   <p className="font-semibold">Authentic Spices</p>
                 </div>
                 <div className="relative overflow-hidden rounded-2xl shadow-lg group">
-                  {!imagesLoaded.chef && (
+                  {!imagesLoaded.feast && (
                     <SkeletonShimmer className="absolute inset-0 h-48" />
                   )}
                   <img
-                    src={chefCooking}
-                    alt="Chef Cooking"
+                    src={sadyaFeast}
+                    alt="Traditional Kerala Sadya Feast"
                     className={`w-full h-48 object-cover transition-all duration-700 group-hover:scale-110 ${
-                      imagesLoaded.chef ? 'opacity-100' : 'opacity-0'
+                      imagesLoaded.feast ? 'opacity-100' : 'opacity-0'
                     }`}
                   />
                 </div>
