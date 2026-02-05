@@ -1,27 +1,40 @@
-import { useState } from 'react';
-import restaurantInterior from '@/assets/gallery/restaurant-interior.jpg';
-import sadyaFeast from '@/assets/gallery/sadya-feast.jpg';
-import cookingScene from '@/assets/gallery/cooking-scene.jpg';
-import fishCurry from '@/assets/dishes/fish-curry.jpg';
-import beefFry from '@/assets/dishes/beef-fry.jpg';
-import biryani from '@/assets/dishes/biryani.jpg';
-import keralaMeals from '@/assets/dishes/kerala-meals.jpg';
-import chickenRoast from '@/assets/dishes/chicken-roast.jpg';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { X } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
-const galleryImages = [
-  { src: restaurantInterior, alt: 'Restaurant Interior', category: 'Ambience' },
-  { src: sadyaFeast, alt: 'Kerala Sadya Feast', category: 'Food' },
-  { src: fishCurry, alt: 'Kerala Fish Curry', category: 'Food' },
-  { src: cookingScene, alt: 'Traditional Cooking', category: 'Kitchen' },
-  { src: beefFry, alt: 'Kerala Beef Fry', category: 'Food' },
-  { src: biryani, alt: 'Malabar Biryani', category: 'Food' },
-  { src: keralaMeals, alt: 'Kerala Special Meals', category: 'Food' },
-  { src: chickenRoast, alt: 'Nadan Chicken Roast', category: 'Food' },
-];
+interface GalleryImage {
+  id: string;
+  title: string;
+  image_url: string;
+  category: string | null;
+}
 
 const Gallery = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchGalleryImages = async () => {
+      const { data, error } = await supabase
+        .from('gallery_images')
+        .select('id, title, image_url, category')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching gallery images:', error);
+        setLoading(false);
+        return;
+      }
+
+      setGalleryImages(data || []);
+      setLoading(false);
+    };
+
+    fetchGalleryImages();
+  }, []);
 
   return (
     <section id="gallery" className="py-20 bg-white">
@@ -35,33 +48,51 @@ const Gallery = () => {
           <div className="w-20 h-1 bg-red-500 mx-auto mt-4" />
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} className={`rounded-xl ${i === 0 ? 'md:col-span-2 md:row-span-2 h-64 md:h-80' : 'h-40 md:h-48'}`} />
+            ))}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && galleryImages.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500">No gallery images available yet.</p>
+          </div>
+        )}
+
         {/* Gallery Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
-          {galleryImages.map((image, index) => (
-            <div
-              key={index}
-              onClick={() => setSelectedImage(image.src)}
-              className={`relative overflow-hidden rounded-xl cursor-pointer group ${
-                index === 0 ? 'md:col-span-2 md:row-span-2' : ''
-              }`}
-            >
-              <img
-                src={image.src}
-                alt={image.alt}
-                className={`w-full object-cover transition-transform duration-500 group-hover:scale-110 ${
-                  index === 0 ? 'h-64 md:h-full' : 'h-40 md:h-48'
+        {!loading && galleryImages.length > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
+            {galleryImages.map((image, index) => (
+              <div
+                key={image.id}
+                onClick={() => setSelectedImage(image.image_url)}
+                className={`relative overflow-hidden rounded-xl cursor-pointer group ${
+                  index === 0 ? 'md:col-span-2 md:row-span-2' : ''
                 }`}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                <span className="inline-block px-3 py-1 bg-green-600 text-white text-sm font-medium rounded-full">
-                  {image.category}
-                </span>
-                <p className="text-white font-medium mt-1">{image.alt}</p>
+              >
+                <img
+                  src={image.image_url}
+                  alt={image.title}
+                  className={`w-full object-cover transition-transform duration-500 group-hover:scale-110 ${
+                    index === 0 ? 'h-64 md:h-full' : 'h-40 md:h-48'
+                  }`}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                  <span className="inline-block px-3 py-1 bg-green-600 text-white text-sm font-medium rounded-full">
+                    {image.category || 'Food'}
+                  </span>
+                  <p className="text-white font-medium mt-1">{image.title}</p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Lightbox */}
