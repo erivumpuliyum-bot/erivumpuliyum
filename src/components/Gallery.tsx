@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { X } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
+import { SkeletonShimmer } from '@/components/ui/skeleton-shimmer';
 
 interface GalleryImage {
   id: string;
@@ -9,6 +9,68 @@ interface GalleryImage {
   image_url: string;
   category: string | null;
 }
+
+// Progressive image component with blur-up loading
+const ProgressiveImage = ({ 
+  src, 
+  alt, 
+  className,
+  onClick 
+}: { 
+  src: string; 
+  alt: string; 
+  className?: string;
+  onClick?: () => void;
+}) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [isInView, setIsInView] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '100px', threshold: 0.01 }
+    );
+
+    const element = document.getElementById(`img-${src.slice(-20)}`);
+    if (element) observer.observe(element);
+
+    return () => observer.disconnect();
+  }, [src]);
+
+  return (
+    <div 
+      id={`img-${src.slice(-20)}`}
+      className="relative w-full h-full overflow-hidden bg-muted"
+      onClick={onClick}
+    >
+      {/* Placeholder skeleton */}
+      {!isLoaded && (
+        <div className="absolute inset-0">
+          <SkeletonShimmer className="w-full h-full" />
+        </div>
+      )}
+      
+      {/* Actual image - only load when in view */}
+      {isInView && (
+        <img
+          src={src}
+          alt={alt}
+          loading="lazy"
+          decoding="async"
+          onLoad={() => setIsLoaded(true)}
+          className={`${className} transition-opacity duration-500 ${
+            isLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+        />
+      )}
+    </div>
+  );
+};
 
 const Gallery = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -36,6 +98,14 @@ const Gallery = () => {
     fetchGalleryImages();
   }, []);
 
+  const handleImageClick = useCallback((imageUrl: string) => {
+    setSelectedImage(imageUrl);
+  }, []);
+
+  const closeLightbox = useCallback(() => {
+    setSelectedImage(null);
+  }, []);
+
   return (
     <section id="gallery" className="py-20 bg-white">
       <div className="container mx-auto px-4">
@@ -52,7 +122,10 @@ const Gallery = () => {
         {loading && (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
             {Array.from({ length: 8 }).map((_, i) => (
-              <Skeleton key={i} className={`rounded-xl ${i === 0 ? 'md:col-span-2 md:row-span-2 h-64 md:h-80' : 'h-40 md:h-48'}`} />
+              <SkeletonShimmer 
+                key={i} 
+                className={`rounded-xl ${i === 0 ? 'md:col-span-2 md:row-span-2 h-64 md:h-80' : 'h-40 md:h-48'}`} 
+              />
             ))}
           </div>
         )}
@@ -64,27 +137,30 @@ const Gallery = () => {
           </div>
         )}
 
-        {/* Gallery Grid */}
+        {/* Gallery Grid - Optimized with CSS containment */}
         {!loading && galleryImages.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
+          <div 
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-6xl mx-auto"
+            style={{ contain: 'layout style' }}
+          >
             {galleryImages.map((image, index) => (
               <div
                 key={image.id}
-                onClick={() => setSelectedImage(image.image_url)}
-                className={`relative overflow-hidden rounded-xl cursor-pointer group ${
+                className={`relative overflow-hidden rounded-xl cursor-pointer group will-change-transform ${
                   index === 0 ? 'md:col-span-2 md:row-span-2' : ''
                 }`}
+                style={{ contain: 'layout paint' }}
               >
-                <img
+                <ProgressiveImage
                   src={image.image_url}
                   alt={image.title}
-                  loading="lazy"
+                  onClick={() => handleImageClick(image.image_url)}
                   className={`w-full object-cover transition-transform duration-500 group-hover:scale-110 ${
                     index === 0 ? 'h-64 md:h-full' : 'h-40 md:h-48'
                   }`}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 pointer-events-none">
                   <span className="inline-block px-3 py-1 bg-green-600 text-white text-sm font-medium rounded-full">
                     {image.category || 'Food'}
                   </span>
@@ -96,15 +172,16 @@ const Gallery = () => {
         )}
       </div>
 
-      {/* Lightbox */}
+      {/* Lightbox - Optimized */}
       {selectedImage && (
         <div
           className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
-          onClick={() => setSelectedImage(null)}
+          onClick={closeLightbox}
         >
           <button
-            onClick={() => setSelectedImage(null)}
-            className="absolute top-4 right-4 text-white/80 hover:text-white p-2"
+            onClick={closeLightbox}
+            className="absolute top-4 right-4 text-white/80 hover:text-white p-2 z-10"
+            aria-label="Close lightbox"
           >
             <X className="w-8 h-8" />
           </button>
