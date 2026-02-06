@@ -30,7 +30,7 @@ const featuredDishes = [
   },
   {
     name: 'Malabar Parotta',
-    description: 'Layered flatbread, soft inside and crispy outside, perfect with curries.',
+    description: 'Iconic Kerala flatbread with 50+ flaky layers, hand-crafted using age-old techniques for the perfect crisp.',
     image: malabarParotta,
     tags: ['Pairs with: Chicken or Beef Fry'],
     tagStyle: 'bg-gray-100 text-gray-700',
