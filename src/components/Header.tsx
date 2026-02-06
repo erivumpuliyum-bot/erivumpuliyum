@@ -91,7 +91,7 @@ const Header = () => {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link to="/" className="flex items-center">
-              <img alt="Erivum Puliyum" className="h-10 sm:h-12 md:h-14 w-auto brightness-110" src="/lovable-uploads/82340129-92fe-4722-bb78-81fbc5c81b80.jpg" />
+              <img alt="Erivum Puliyum" className="h-10 sm:h-12 md:h-14 w-auto brightness-110 mix-blend-multiply" src="/lovable-uploads/82340129-92fe-4722-bb78-81fbc5c81b80.jpg" />
             </Link>
 
             {/* Desktop Navigation */}
