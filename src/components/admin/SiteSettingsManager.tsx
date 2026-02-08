@@ -3,9 +3,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Save, Settings } from 'lucide-react';
+import { Save, Settings, BookOpen } from 'lucide-react';
 
 interface SiteSetting {
   id: string;
@@ -22,6 +23,8 @@ const settingsConfig = [
   { key: 'whatsapp', label: 'WhatsApp Number', type: 'text' },
   { key: 'facebook_url', label: 'Facebook URL', type: 'url' },
   { key: 'instagram_url', label: 'Instagram URL', type: 'url' },
+  { key: 'about_paragraph_1', label: 'Our Story - Paragraph 1', type: 'textarea' },
+  { key: 'about_paragraph_2', label: 'Our Story - Paragraph 2', type: 'textarea' },
 ];
 
 const SiteSettingsManager = () => {
@@ -181,6 +184,37 @@ const SiteSettingsManager = () => {
                 value={settings.instagram_url || ''}
                 onChange={(e) => handleChange('instagram_url', e.target.value)}
                 placeholder="https://instagram.com/..."
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card border-border md:col-span-2">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <BookOpen className="w-5 h-5" />
+              Our Story Section
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="about_paragraph_1">Paragraph 1</Label>
+              <Textarea
+                id="about_paragraph_1"
+                rows={4}
+                value={settings.about_paragraph_1 || ''}
+                onChange={(e) => handleChange('about_paragraph_1', e.target.value)}
+                placeholder="At Erivum Puliyum Restaurant, we bring the true taste of Kerala to Bangalore..."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="about_paragraph_2">Paragraph 2</Label>
+              <Textarea
+                id="about_paragraph_2"
+                rows={4}
+                value={settings.about_paragraph_2 || ''}
+                onChange={(e) => handleChange('about_paragraph_2', e.target.value)}
+                placeholder="From hearty Kerala meals served on banana leaves..."
               />
             </div>
           </CardContent>

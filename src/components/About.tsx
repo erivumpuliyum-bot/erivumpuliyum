@@ -1,11 +1,16 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import spicesImage from '@/assets/spices-image.jpg';
 import sadyaFeast from '@/assets/gallery/sadya-feast.jpg';
 import { AnimatedSection } from '@/components/ui/animated-section';
 import { SkeletonShimmer } from '@/components/ui/skeleton-shimmer';
 
+const defaultParagraph1 = 'At Erivum Puliyum Restaurant, we bring the true taste of Kerala to Bangalore. Inspired by age-old family recipes, our dishes are cooked using freshly ground spices, coconut-based gravies, and traditional techniques passed down through generations.';
+const defaultParagraph2 = "From hearty Kerala meals served on banana leaves to rich seafood curries infused with kudampuli, every dish reflects the soul of God's Own Country.";
+
 const About = () => {
   const [imagesLoaded, setImagesLoaded] = useState({ spices: false, feast: false });
+  const [aboutText, setAboutText] = useState({ paragraph1: defaultParagraph1, paragraph2: defaultParagraph2 });
 
   useEffect(() => {
     // Preload images
@@ -16,6 +21,25 @@ const About = () => {
     const feastImg = new Image();
     feastImg.src = sadyaFeast;
     feastImg.onload = () => setImagesLoaded(prev => ({ ...prev, feast: true }));
+
+    // Fetch about text from settings
+    const fetchAboutText = async () => {
+      const { data } = await supabase
+        .from('site_settings')
+        .select('setting_key, setting_value')
+        .in('setting_key', ['about_paragraph_1', 'about_paragraph_2']);
+
+      if (data) {
+        const p1 = data.find(s => s.setting_key === 'about_paragraph_1')?.setting_value;
+        const p2 = data.find(s => s.setting_key === 'about_paragraph_2')?.setting_value;
+        setAboutText({
+          paragraph1: p1 || defaultParagraph1,
+          paragraph2: p2 || defaultParagraph2,
+        });
+      }
+    };
+
+    fetchAboutText();
   }, []);
 
   return (
@@ -33,10 +57,10 @@ const About = () => {
           <AnimatedSection animation="slide-right" delay={100}>
             <div className="bg-gray-50 rounded-3xl p-8 md:p-10 shadow-lg transition-all duration-300 hover:shadow-xl">
               <p className="text-gray-700 text-lg leading-relaxed mb-6">
-                At <span className="text-green-600 font-semibold">Erivum Puliyum Restaurant</span>, we bring the true taste of Kerala to Bangalore. Inspired by age-old family recipes, our dishes are cooked using freshly ground spices, coconut-based gravies, and traditional techniques passed down through generations.
+                {aboutText.paragraph1}
               </p>
               <p className="text-gray-700 text-lg leading-relaxed">
-                From hearty Kerala meals served on banana leaves to rich seafood curries infused with kudampuli, every dish reflects the soul of <span className="text-green-600 font-semibold italic">God's Own Country</span>.
+                {aboutText.paragraph2}
               </p>
             </div>
           </AnimatedSection>
