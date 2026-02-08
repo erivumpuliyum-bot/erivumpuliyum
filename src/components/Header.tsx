@@ -110,13 +110,8 @@ const Header = () => {
 
             {/* Right Side Actions */}
             <div className="flex items-center gap-3">
-              {/* Call Button - Hidden on very small screens */}
-              <a href="tel:08951755121" className={`hidden sm:flex items-center gap-2 px-4 md:px-5 py-2 md:py-2.5 rounded-full font-medium transition-all shadow-lg ${isScrolled ? 'bg-white text-green-700 hover:bg-gray-100' : 'bg-green-600 text-white hover:bg-green-700'}`} style={{
-                fontFamily: "'Poppins', sans-serif"
-              }}>
-                <Phone className="w-4 h-4" />
-                <span className="hidden lg:inline">089517 55121</span>
-              </a>
+              {/* Empty space where call button was */}
+              <div className="hidden sm:block w-32 md:w-40" />
 
               {/* Mobile Hamburger Menu */}
               <Sheet open={isOpen} onOpenChange={setIsOpen}>
