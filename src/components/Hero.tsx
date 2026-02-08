@@ -116,14 +116,6 @@ const Hero = () => {
               <MapPin className="w-5 h-5 text-rose-300" />
               <span className="font-medium" style={{ fontFamily: "'Poppins', sans-serif" }}>Bellandur</span>
             </div>
-            <a
-              href="tel:08951755121"
-              className="group flex items-center gap-2 px-5 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-full font-medium transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
-              style={{ fontFamily: "'Poppins', sans-serif" }}
-            >
-              <Phone className="w-4 h-4 transition-transform group-hover:rotate-12" />
-              089517 55121
-            </a>
             <div className="flex items-center gap-2 px-4 py-2 bg-white/15 backdrop-blur-sm rounded-full text-white/90 hover:bg-white/20 transition-colors">
               <Clock className="w-5 h-5" />
               <span style={{ fontFamily: "'Poppins', sans-serif" }}>11:30 AM – 11:00 PM</span>
