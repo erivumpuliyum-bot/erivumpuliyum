@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { X } from 'lucide-react';
+import { getOptimizedImageUrl } from '@/lib/imageUtils';
 
 interface GalleryImage {
   id: string;
