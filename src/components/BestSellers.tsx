@@ -15,7 +15,6 @@ const BestSellers = () => {
   const [galleryItems, setGalleryItems] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch food photos from gallery
   useEffect(() => {
     const fetchGalleryImages = async () => {
       const { data, error } = await supabase
@@ -23,7 +22,8 @@ const BestSellers = () => {
         .select('id, title, image_url, category')
         .eq('category', 'Food')
         .eq('is_active', true)
-        .order('display_order', { ascending: true });
+        .order('display_order', { ascending: true })
+        .limit(10);
 
       if (error) {
         console.error('Error fetching gallery images:', error);
@@ -41,7 +41,6 @@ const BestSellers = () => {
   // Double the items for seamless infinite scroll
   const duplicatedItems = [...galleryItems, ...galleryItems];
 
-  // Don't render if no gallery items
   if (!loading && galleryItems.length === 0) {
     return null;
   }
@@ -49,7 +48,6 @@ const BestSellers = () => {
   return (
     <section id="bestsellers" className="py-16 bg-green-700 overflow-hidden">
       <div className="container mx-auto px-4">
-        {/* Header */}
         <AnimatedSection animation="fade-up">
           <div className="flex items-center justify-center gap-4 mb-12">
             <div className="h-px w-16 bg-orange-300" />
@@ -62,7 +60,6 @@ const BestSellers = () => {
           </div>
         </AnimatedSection>
 
-        {/* Loading Skeleton */}
         {loading && (
           <div className="flex gap-6 overflow-hidden">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -71,7 +68,6 @@ const BestSellers = () => {
           </div>
         )}
 
-        {/* Infinite Scroll Carousel */}
         {!loading && galleryItems.length > 0 && (
           <div className="overflow-hidden">
             <div 
@@ -92,10 +88,12 @@ const BestSellers = () => {
                         src={item.image_url}
                         alt={item.title}
                         loading="lazy"
+                        decoding="async"
+                        width={224}
+                        height={192}
                         className="w-full h-40 md:h-48 object-cover transition-transform duration-500 group-hover:scale-110"
                       />
                     </div>
-                    {/* Overlay on hover */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>
                   <p className="text-white text-center mt-3 font-medium transition-transform duration-300 group-hover:-translate-y-1">
