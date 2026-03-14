@@ -95,7 +95,7 @@ const Gallery = () => {
                 )}
                 
                 <img
-                  src={image.image_url}
+                  src={getOptimizedImageUrl(image.image_url, index === 0 ? 600 : 400, 75)}
                   alt={image.title}
                   loading="lazy"
                   decoding="async"
