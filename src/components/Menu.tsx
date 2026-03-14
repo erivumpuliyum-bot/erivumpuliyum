@@ -87,6 +87,9 @@ const Menu = () => {
                       src={dish.image_url}
                       alt={dish.title}
                       loading="lazy"
+                      decoding="async"
+                      width={400}
+                      height={192}
                       className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     {/* Overlay on hover */}

@@ -98,6 +98,8 @@ const Gallery = () => {
                   alt={image.title}
                   loading="lazy"
                   decoding="async"
+                  width={index === 0 ? 600 : 300}
+                  height={index === 0 ? 400 : 192}
                   onLoad={() => handleImageLoad(image.id)}
                   className={`w-full object-cover transition-all duration-500 group-hover:scale-110 ${
                     index === 0 ? 'h-64 md:h-full' : 'h-40 md:h-48'

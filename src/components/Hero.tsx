@@ -4,15 +4,8 @@ import heroBackground from '@/assets/hero-background.jpg';
 
 const Hero = () => {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
-    // Preload the background image
-    const img = new Image();
-    img.src = heroBackground;
-    img.onload = () => setImageLoaded(true);
-    
-    // Trigger animations after a short delay
     const timer = setTimeout(() => setIsLoaded(true), 100);
     return () => clearTimeout(timer);
   }, []);
@@ -26,20 +19,15 @@ const Hero = () => {
 
   return (
     <section className="relative h-screen w-full overflow-hidden">
-      {/* Skeleton loader for background */}
-      {!imageLoaded && (
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/80 to-primary animate-pulse" />
-      )}
-      
-      {/* Background Image with fade-in */}
-      <div
-        className={`absolute inset-0 transition-opacity duration-1000 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-        style={{
-          backgroundImage: `url(${heroBackground})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-        }}
+      {/* Background Image - use <img> for LCP optimization */}
+      <img
+        src={heroBackground}
+        alt=""
+        fetchPriority="high"
+        decoding="async"
+        className="absolute inset-0 w-full h-full object-cover"
+        width={1920}
+        height={1080}
       />
       
       {/* Dark Green Overlay for readability */}
@@ -58,7 +46,7 @@ const Hero = () => {
               isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}
             style={{ 
-              fontFamily: "'Cormorant Garamond', 'Playfair Display', serif",
+              fontFamily: "'Playfair Display', serif",
               color: 'rgba(253, 248, 243, 0.95)',
               textShadow: '1px 2px 10px rgba(0,0,0,0.3)',
               letterSpacing: '0.05em',

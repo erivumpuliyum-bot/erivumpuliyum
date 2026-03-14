@@ -102,6 +102,10 @@ const About = () => {
                   <img
                     src={sadyaFeast}
                     alt="Traditional Kerala Sadya Feast"
+                    loading="lazy"
+                    decoding="async"
+                    width={300}
+                    height={192}
                     className={`w-full h-48 object-cover transition-all duration-700 group-hover:scale-110 ${
                       imagesLoaded.feast ? 'opacity-100' : 'opacity-0'
                     }`}
