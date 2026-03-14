@@ -18,16 +18,32 @@ const SectionFallback = () => (
 
 const Index = () => {
   useEffect(() => {
-    // Load JotForm agent script after page is interactive
-    const timer = setTimeout(() => {
+    // Load JotForm only after user interaction (click/scroll/touch)
+    let loaded = false;
+    const loadJotForm = () => {
+      if (loaded) return;
+      loaded = true;
       const script = document.createElement('script');
       script.src = 'https://cdn.jotfor.ms/agent/embedjs/019bf74ce34b703180edb303e0e7f0c7a6a2/embed.js';
       script.async = true;
       document.body.appendChild(script);
-    }, 3000);
+      // Remove listeners after loading
+      window.removeEventListener('scroll', loadJotForm);
+      window.removeEventListener('click', loadJotForm);
+      window.removeEventListener('touchstart', loadJotForm);
+    };
+
+    // Also load after 5s as fallback
+    const timer = setTimeout(loadJotForm, 5000);
+    window.addEventListener('scroll', loadJotForm, { once: true, passive: true });
+    window.addEventListener('click', loadJotForm, { once: true });
+    window.addEventListener('touchstart', loadJotForm, { once: true, passive: true });
 
     return () => {
       clearTimeout(timer);
+      window.removeEventListener('scroll', loadJotForm);
+      window.removeEventListener('click', loadJotForm);
+      window.removeEventListener('touchstart', loadJotForm);
       const existingScript = document.querySelector(`script[src*="jotfor.ms"]`);
       if (existingScript) existingScript.remove();
     };
