@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { AnimatedSection } from '@/components/ui/animated-section';
 import { SkeletonShimmer } from '@/components/ui/skeleton-shimmer';
+import { getOptimizedImageUrl } from '@/lib/imageUtils';
 
 interface GalleryImage {
   id: string;
