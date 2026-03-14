@@ -76,6 +76,10 @@ const About = () => {
                   <img
                     src={spicesImage}
                     alt="Authentic Spices"
+                    loading="lazy"
+                    decoding="async"
+                    width={300}
+                    height={192}
                     className={`w-full h-48 object-cover transition-all duration-700 group-hover:scale-110 ${
                       imagesLoaded.spices ? 'opacity-100' : 'opacity-0'
                     }`}
