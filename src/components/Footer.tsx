@@ -13,6 +13,8 @@ const Footer = () => {
             <img
               src={epLogo}
               alt="Erivum Puliyum"
+              width={160}
+              height={64}
               className="h-16 w-auto mb-4 brightness-0 invert"
             />
             <p className="text-gray-400 text-sm leading-relaxed">

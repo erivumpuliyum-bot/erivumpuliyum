@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { AnimatedSection } from '@/components/ui/animated-section';
 import { SkeletonShimmer } from '@/components/ui/skeleton-shimmer';
+import { getOptimizedImageUrl } from '@/lib/imageUtils';
 
 interface GalleryImage {
   id: string;
@@ -84,7 +85,7 @@ const Menu = () => {
                 <div className="group bg-card rounded-2xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
                   <div className="relative overflow-hidden">
                     <img
-                      src={dish.image_url}
+                      src={getOptimizedImageUrl(dish.image_url, 400, 75)}
                       alt={dish.title}
                       loading="lazy"
                       decoding="async"

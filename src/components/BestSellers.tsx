@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AnimatedSection } from '@/components/ui/animated-section';
 import { BestSellerSkeleton } from '@/components/ui/skeleton-shimmer';
+import { getOptimizedImageUrl } from '@/lib/imageUtils';
 
 interface GalleryImage {
   id: string;
@@ -38,7 +39,6 @@ const BestSellers = () => {
     fetchGalleryImages();
   }, []);
 
-  // Double the items for seamless infinite scroll
   const duplicatedItems = [...galleryItems, ...galleryItems];
 
   if (!loading && galleryItems.length === 0) {
@@ -85,7 +85,7 @@ const BestSellers = () => {
                   <div className="relative rounded-xl overflow-hidden shadow-xl transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-2">
                     <div className="overflow-hidden">
                       <img
-                        src={item.image_url}
+                        src={getOptimizedImageUrl(item.image_url, 300, 70)}
                         alt={item.title}
                         loading="lazy"
                         decoding="async"

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { X } from 'lucide-react';
+import { getOptimizedImageUrl } from '@/lib/imageUtils';
 
 interface GalleryImage {
   id: string;
@@ -94,7 +95,7 @@ const Gallery = () => {
                 )}
                 
                 <img
-                  src={image.image_url}
+                  src={getOptimizedImageUrl(image.image_url, index === 0 ? 600 : 400, 75)}
                   alt={image.title}
                   loading="lazy"
                   decoding="async"
@@ -134,7 +135,7 @@ const Gallery = () => {
           </button>
           <img
             src={selectedImage}
-            alt="Gallery Image"
+            alt="Gallery Image Full Size"
             className="max-w-full max-h-[90vh] object-contain rounded-lg"
             onClick={(e) => e.stopPropagation()}
           />
