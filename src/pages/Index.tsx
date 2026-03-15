@@ -5,7 +5,7 @@ import Hero from '@/components/Hero';
 // Lazy load below-the-fold components
 const BestSellers = lazy(() => import('@/components/BestSellers'));
 const About = lazy(() => import('@/components/About'));
-const Menu = lazy(() => import('@/components/Menu'));
+
 const Testimonials = lazy(() => import('@/components/Testimonials'));
 const Locations = lazy(() => import('@/components/Locations'));
 const Footer = lazy(() => import('@/components/Footer'));
@@ -59,9 +59,6 @@ const Index = () => {
         </Suspense>
         <Suspense fallback={<SectionFallback />}>
           <About />
-        </Suspense>
-        <Suspense fallback={<SectionFallback />}>
-          <Menu />
         </Suspense>
         <Suspense fallback={<SectionFallback />}>
           <Testimonials />
