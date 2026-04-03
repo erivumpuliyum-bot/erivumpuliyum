@@ -71,6 +71,7 @@ const Index = () => {
       <Suspense fallback={null}>
         <Footer />
       </Suspense>
+      <PromoBanner />
     </div>
   );
 };
