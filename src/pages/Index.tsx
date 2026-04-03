@@ -1,6 +1,7 @@
 import { useEffect, lazy, Suspense } from 'react';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
+import PromoBanner from '@/components/PromoBanner';
 
 // Lazy load below-the-fold components
 const BestSellers = lazy(() => import('@/components/BestSellers'));
@@ -70,6 +71,7 @@ const Index = () => {
       <Suspense fallback={null}>
         <Footer />
       </Suspense>
+      <PromoBanner />
     </div>
   );
 };
